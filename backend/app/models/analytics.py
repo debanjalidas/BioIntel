@@ -12,12 +12,12 @@ from sqlalchemy import (
     CheckConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from backend.app.core.database import Base, TimestampMixin
-from backend.app.models.enums import AlertSeverity, AlertStatus, RiskLevel
+from app.core.database import Base, TimestampMixin
+from app.models.enums import AlertSeverity, AlertStatus, RiskLevel
 
 if TYPE_CHECKING:
-    from backend.app.models.spatial import MonitoringSite, Zone
-    from backend.app.models.user import User
+    from app.models.spatial import MonitoringSite, Zone
+    from app.models.user import User
 
 
 class HabitatMetric(Base, TimestampMixin):

@@ -1,13 +1,13 @@
 from typing import List, Optional, TYPE_CHECKING
 from sqlalchemy import String, Text, Boolean, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from backend.app.core.database import Base, TimestampMixin
-from backend.app.models.enums import ConservationStatus
+from app.core.database import Base, TimestampMixin
+from app.models.enums import ConservationStatus
 
 if TYPE_CHECKING:
-    from backend.app.models.observation import Observation
-    from backend.app.models.acoustic import AcousticDetection
-    from backend.app.models.edna import EdnaDetection
+    from app.models.observation import Observation
+    from app.models.acoustic import AcousticDetection
+    from app.models.edna import EdnaDetection
 
 
 class Species(Base, TimestampMixin):

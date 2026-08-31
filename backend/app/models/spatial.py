@@ -2,14 +2,14 @@ from typing import List, Optional, TYPE_CHECKING
 from sqlalchemy import String, Text, Float, Integer, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from geoalchemy2 import Geometry
-from backend.app.core.database import Base, TimestampMixin
-from backend.app.models.enums import RiskLevel, SiteStatus
+from app.core.database import Base, TimestampMixin
+from app.models.enums import RiskLevel, SiteStatus
 
 if TYPE_CHECKING:
-    from backend.app.models.observation import Observation
-    from backend.app.models.acoustic import AcousticRecording
-    from backend.app.models.edna import EdnaSample
-    from backend.app.models.analytics import HabitatMetric, BiodiversityScore, RiskScore, Alert
+    from app.models.observation import Observation
+    from app.models.acoustic import AcousticRecording
+    from app.models.edna import EdnaSample
+    from app.models.analytics import HabitatMetric, BiodiversityScore, RiskScore, Alert
 
 
 class Zone(Base, TimestampMixin):

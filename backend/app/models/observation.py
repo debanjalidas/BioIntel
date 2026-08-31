@@ -13,13 +13,13 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from geoalchemy2 import Geometry
-from backend.app.core.database import Base, TimestampMixin
-from backend.app.models.enums import ObservationSource, VerificationStatus
+from app.core.database import Base, TimestampMixin
+from app.models.enums import ObservationSource, VerificationStatus
 
 if TYPE_CHECKING:
-    from backend.app.models.spatial import MonitoringSite, Zone
-    from backend.app.models.species import Species
-    from backend.app.models.user import User
+    from app.models.spatial import MonitoringSite, Zone
+    from app.models.species import Species
+    from app.models.user import User
 
 
 class Observation(Base, TimestampMixin):

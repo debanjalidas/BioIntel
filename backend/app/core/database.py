@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Generator
 from sqlalchemy import create_engine, DateTime, func
 from sqlalchemy.orm import declarative_base, sessionmaker, scoped_session, Mapped, mapped_column
-from backend.app.core.config import settings
+from app.core.config import settings
 
 # Engine configuration with connection recycling and health check
 engine = create_engine(

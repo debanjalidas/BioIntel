@@ -12,13 +12,13 @@ from sqlalchemy import (
     CheckConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from backend.app.core.database import Base, TimestampMixin
-from backend.app.models.enums import VerificationStatus
+from app.core.database import Base, TimestampMixin
+from app.models.enums import VerificationStatus
 
 if TYPE_CHECKING:
-    from backend.app.models.spatial import MonitoringSite
-    from backend.app.models.species import Species
-    from backend.app.models.user import User
+    from app.models.spatial import MonitoringSite
+    from app.models.species import Species
+    from app.models.user import User
 
 
 class AcousticRecording(Base, TimestampMixin):

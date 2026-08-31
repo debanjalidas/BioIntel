@@ -6,12 +6,12 @@ from sqlalchemy import engine_from_config, pool, text
 from alembic import context
 import geoalchemy2
 
-# Ensure project root is in sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+# Ensure backend root is in sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from backend.app.core.config import settings
-from backend.app.core.database import Base
-import backend.app.models  # noqa: F401
+from app.core.config import settings
+from app.core.database import Base
+import app.models  # noqa: F401
 
 config = context.config
 
@@ -22,7 +22,7 @@ target_metadata = Base.metadata
 
 
 def include_object(object, name, type_, reflected, compare_to):
-    # Ignore spatial_ref_sys table managed by PostGIS
+    # Ignore internal spatial_ref_sys table managed by PostGIS
     if type_ == "table" and name in ["spatial_ref_sys", "geography_columns", "geometry_columns", "raster_columns", "raster_overviews"]:
         return False
     return True

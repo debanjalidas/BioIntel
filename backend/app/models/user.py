@@ -1,14 +1,14 @@
 from typing import List, TYPE_CHECKING
 from sqlalchemy import String, Boolean, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from backend.app.core.database import Base, TimestampMixin
-from backend.app.models.enums import UserRole
+from app.core.database import Base, TimestampMixin
+from app.models.enums import UserRole
 
 if TYPE_CHECKING:
-    from backend.app.models.observation import Observation
-    from backend.app.models.edna import EdnaSample
-    from backend.app.models.acoustic import AcousticDetection
-    from backend.app.models.analytics import Alert
+    from app.models.observation import Observation
+    from app.models.edna import EdnaSample
+    from app.models.acoustic import AcousticDetection
+    from app.models.analytics import Alert
 
 
 class User(Base, TimestampMixin):

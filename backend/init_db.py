@@ -2,20 +2,28 @@
 Enables PostGIS extension and creates all database tables.
 """
 
+import os
 import sys
 import logging
+
+# Ensure backend root is always in sys.path
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+if CURRENT_DIR not in sys.path:
+    sys.path.insert(0, CURRENT_DIR)
+
 from sqlalchemy import text
-from backend.app.core.config import settings
-from backend.app.core.database import engine, Base
+from app.core.config import settings
+from app.core.database import engine, Base
 # Import all models to ensure metadata registration
-import backend.app.models  # noqa: F401
+import app.models  # noqa: F401
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 
 def init_database() -> None:
-    logger.info("Connecting to database: %s", settings.SQLALCHEMY_DATABASE_URI.split("@")[-1])
+    db_target = settings.SQLALCHEMY_DATABASE_URI.split("@")[-1] if "@" in settings.SQLALCHEMY_DATABASE_URI else "local"
+    logger.info("Connecting to database: %s", db_target)
     
     with engine.connect() as conn:
         # Enable PostGIS spatial extension
