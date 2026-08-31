@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import {
   Layers,
   ListFilter,
@@ -6,130 +8,288 @@ import {
   Minimize2,
   MoreHorizontal,
   ChevronDown,
+  Volume2,
+  Dna,
+  Camera,
+  TreePine,
+  ShieldAlert,
+  MapPin,
 } from 'lucide-react';
 
+// Real forest coordinates: Kaziranga Tiger Reserve & Nilgiri Biosphere Forest
+const FOREST_CENTER = [26.585, 93.175];
+
 export default function EcosystemMap({ onSelectSite }) {
-  const [activeLayer, setActiveLayer] = useState('Topographic');
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const polygonLayerRef = useRef(null);
+  const tileLayerRef = useRef(null);
+
+  const [activeLayer, setActiveLayer] = useState('Satellite Forest');
   const [showLegend, setShowLegend] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [selectedPin, setSelectedPin] = useState(null);
+  const [selectedSite, setSelectedSite] = useState(null);
 
-  // Exact pins layout matching the reference screenshot
+  // Available real forest tile sources
+  const tileProviders = {
+    'Satellite Forest': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    'Topographic Forest': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    'OpenTopoMap': 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    'CartoDB Voyager': 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+  };
+
+  // Real Monitoring Sites with GPS coordinates
   const sites = [
     {
       id: 1,
       name: 'Western Core Sanctuary (Beta-1)',
-      type: 'Flora & Fauna Census',
-      species: 'Optimal Biomass Index',
+      type: 'Bioacoustic PAM & Camera Trap',
+      species: 'Asian Elephant, Green Bee-eater',
       status: 'Optimal Health',
-      haloColor: 'bg-emerald-500/25 ring-emerald-500/40',
-      coreColor: 'bg-emerald-500 text-white',
-      top: '36%',
-      left: '28%',
-      icon: (
-        <svg className="w-3.5 h-3.5 fill-current text-white" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12c0 3.31 1.61 6.24 4.09 8.04L12 14l5.91 6.04C20.39 18.24 22 15.31 22 12c0-5.52-4.48-10-10-10zm-1 14.59L7.41 13 6 14.41l5 5 9-9-1.41-1.41L11 16.59z"/>
-        </svg>
-      ),
+      severity: 'optimal',
+      lat: 26.592,
+      lng: 93.148,
       glyph: '🌿',
+      haloColor: 'rgba(16, 185, 129, 0.35)',
+      coreColor: '#10b981',
+      details: 'Acoustic activity 98% normal. 42 distinct avian species registered in the last 24h.',
     },
     {
       id: 2,
-      name: 'South-West Buffer Station',
-      type: 'Bioacoustic Monitor',
-      species: 'Acoustic Decline Warning',
+      name: 'South-West Buffer Outpost',
+      type: 'Acoustic Activity Grid',
+      species: 'Acoustic Frequency Decline',
       status: 'Moderate Threat',
-      haloColor: 'bg-amber-500/25 ring-amber-500/40',
-      coreColor: 'bg-amber-500 text-white',
-      top: '51%',
-      left: '29%',
+      severity: 'moderate',
+      lat: 26.568,
+      lng: 93.152,
       glyph: '⚠️',
+      haloColor: 'rgba(245, 158, 11, 0.35)',
+      coreColor: '#f59e0b',
+      details: 'Warning: 22% dip in twilight chorus calling. IoT humidity sensor recalibrated.',
     },
     {
       id: 3,
-      name: 'Western Threat Sector (High Risk)',
-      type: 'Satellite Change Detection',
-      species: 'Habitat Degradation Flagged',
+      name: 'Western Threat Sector (High Risk Perimeter)',
+      type: 'Satellite Sentinel-2 & Ground Patrol',
+      species: 'Deforestation & Canopy Loss',
       status: 'Critical Alert Zone',
-      haloColor: 'bg-rose-500/30 ring-rose-500/50 animate-pulse',
-      coreColor: 'bg-rose-500 text-white',
-      top: '47%',
-      left: '43%',
+      severity: 'critical',
+      lat: 26.582,
+      lng: 93.171,
       glyph: '⚠️',
+      haloColor: 'rgba(239, 68, 68, 0.45)',
+      coreColor: '#ef4444',
+      details: 'Critical: Sudden NDVI drop (-14%) detected by Sentinel-2 band 8 analysis. Ranger unit dispatched.',
     },
     {
       id: 4,
-      name: 'North River Patrol Outpost',
-      type: 'Camera Trap Grid',
-      species: 'Panthera tigris Detected',
+      name: 'North River Patrol Station',
+      type: 'Camera Trap Array (AI Nightvision)',
+      species: 'Bengal Tiger (Panthera tigris)',
       status: 'Moderate Threat',
-      haloColor: 'bg-amber-500/25 ring-amber-500/40',
-      coreColor: 'bg-amber-500 text-white',
-      top: '33%',
-      left: '53%',
+      severity: 'moderate',
+      lat: 26.605,
+      lng: 93.185,
       glyph: '📷',
+      haloColor: 'rgba(245, 158, 11, 0.35)',
+      coreColor: '#f59e0b',
+      details: 'Adult female tiger with 2 cubs logged via YOLOv8 inference at 03:14 AM.',
     },
     {
       id: 5,
       name: 'Central Habitat Watchtower',
-      type: 'IoT Canopy Node',
+      type: 'IoT Canopy Micro-Climate Node',
       species: 'Canopy Density 78%',
       status: 'Moderate Threat',
-      haloColor: 'bg-amber-500/25 ring-amber-500/40',
-      coreColor: 'bg-amber-500 text-white',
-      top: '43%',
-      left: '52%',
+      severity: 'moderate',
+      lat: 26.586,
+      lng: 93.182,
       glyph: '🌲',
+      haloColor: 'rgba(245, 158, 11, 0.35)',
+      coreColor: '#f59e0b',
+      details: 'Microclimate metrics: Temperature 24.2°C, Humidity 82%, Solar radiation 4.2 kWh/m².',
     },
     {
       id: 6,
-      name: 'Core Sanctuary River Bed',
-      type: 'Riparian Ecosystem Station',
-      species: 'Native Flora Recovered',
+      name: 'Core Sanctuary Riverbed Station',
+      type: 'Riparian Ecosystem Hydrophone',
+      species: 'Smooth-coated Otter, Native Flora',
       status: 'Optimal Health',
-      haloColor: 'bg-emerald-500/25 ring-emerald-500/40',
-      coreColor: 'bg-emerald-500 text-white',
-      top: '53%',
-      left: '50%',
+      severity: 'optimal',
+      lat: 26.574,
+      lng: 93.178,
       glyph: '🌿',
+      haloColor: 'rgba(16, 185, 129, 0.35)',
+      coreColor: '#10b981',
+      details: 'River flow velocity optimal. Dissolved oxygen 7.8 mg/L.',
     },
     {
       id: 7,
-      name: 'River Basin eDNA Sampler',
+      name: 'Brahmaputra Basin eDNA Station',
       type: 'Automated Filtration Robot',
-      species: 'Tor putitora (Golden Mahseer)',
+      species: 'Golden Mahseer (Tor putitora)',
       status: 'Optimal Health',
-      haloColor: 'bg-emerald-500/25 ring-emerald-500/40',
-      coreColor: 'bg-emerald-500 text-white',
-      top: '33%',
-      left: '64%',
+      severity: 'optimal',
+      lat: 26.602,
+      lng: 93.205,
       glyph: '🧬',
+      haloColor: 'rgba(16, 185, 129, 0.35)',
+      coreColor: '#10b981',
+      details: 'Illumina 12S amplicon sequencing verified 99.8% match for endangered Tor putitora.',
     },
     {
       id: 8,
       name: 'Eastern Marshland Laboratory',
-      type: 'Metabarcoding Station',
-      species: 'Microbial Diversity High',
+      type: 'eDNA Metabarcoding Array',
+      species: 'Microbiome & Wetland Census',
       status: 'Moderate Threat',
-      haloColor: 'bg-amber-500/25 ring-amber-500/40',
-      coreColor: 'bg-amber-500 text-white',
-      top: '46%',
-      left: '61%',
+      severity: 'moderate',
+      lat: 26.581,
+      lng: 93.198,
       glyph: '🔬',
+      haloColor: 'rgba(245, 158, 11, 0.35)',
+      coreColor: '#f59e0b',
+      details: 'Seasonal algal bloom risk under evaluation. Nitrate levels within safe limits.',
     },
     {
       id: 9,
-      name: 'Eastern PAM Acoustic Array',
-      type: 'Directional Hydrophone/Mic',
-      species: 'Bioacoustic Species Verified',
+      name: 'Eastern PAM Bioacoustic Grid',
+      type: 'Bioacoustic Directional Array',
+      species: 'Great Hornbill, Common Mormon',
       status: 'Optimal Health',
-      haloColor: 'bg-emerald-500/25 ring-emerald-500/40',
-      coreColor: 'bg-emerald-500 text-white',
-      top: '42%',
-      left: '71%',
+      severity: 'optimal',
+      lat: 26.589,
+      lng: 93.218,
       glyph: '🎙️',
+      haloColor: 'rgba(16, 185, 129, 0.35)',
+      coreColor: '#10b981',
+      details: 'BirdNET AI recognized 36 distinct vocalization calls in the canopy canopy layer.',
     },
   ];
+
+  // High Risk Zone Polygon Coordinates in the forest
+  const highRiskPolygon = [
+    [26.589, 93.162],
+    [26.593, 93.184],
+    [26.584, 93.192],
+    [26.576, 93.188],
+    [26.572, 93.169],
+  ];
+
+  // Initialize and update real Leaflet map instance
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+
+    if (!mapInstanceRef.current) {
+      // Create Leaflet Map Instance
+      const map = L.map(mapContainerRef.current, {
+        center: FOREST_CENTER,
+        zoom: 13,
+        zoomControl: false,
+        attributionControl: false,
+      });
+
+      // Add Base Tile Layer
+      const tileLayer = L.tileLayer(tileProviders[activeLayer], {
+        maxZoom: 18,
+        subdomains: ['a', 'b', 'c'],
+      }).addTo(map);
+      tileLayerRef.current = tileLayer;
+
+      // Add High-Risk Perimeter Polygon (Red Dashed + Mint Tint Fill)
+      const polygon = L.polygon(highRiskPolygon, {
+        color: '#ef4444',
+        weight: 2.5,
+        dashArray: '6, 6',
+        fillColor: '#10b981',
+        fillOpacity: 0.25,
+      }).addTo(map);
+      polygonLayerRef.current = polygon;
+
+      // Add Custom Glowing Halo Markers
+      sites.forEach((site) => {
+        const customIcon = L.divIcon({
+          className: 'custom-forest-marker',
+          html: `
+            <div style="
+              position: relative;
+              width: 36px;
+              height: 36px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+            ">
+              <!-- Outer Glowing Halo -->
+              <div style="
+                position: absolute;
+                inset: 0;
+                border-radius: 9999px;
+                background-color: ${site.haloColor};
+                box-shadow: 0 0 12px ${site.haloColor};
+                animation: ${site.severity === 'critical' ? 'pulse 1.5s infinite' : 'none'};
+              "></div>
+              <!-- Inner Solid Circle -->
+              <div style="
+                position: relative;
+                width: 24px;
+                height: 24px;
+                border-radius: 9999px;
+                background-color: ${site.coreColor};
+                color: #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 11px;
+                font-weight: bold;
+                border: 2px solid #ffffff;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+              ">
+                ${site.glyph}
+              </div>
+            </div>
+          `,
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
+        });
+
+        const marker = L.marker([site.lat, site.lng], { icon: customIcon }).addTo(map);
+
+        // Click handler
+        marker.on('click', () => {
+          setSelectedSite(site);
+          if (onSelectSite) onSelectSite(site);
+        });
+
+        // Hover tooltip
+        marker.bindTooltip(
+          `<strong>${site.name}</strong><br/><span style="color:#10b981;font-size:10px">${site.type}</span>`,
+          { direction: 'top', offset: [0, -18], opacity: 0.95 }
+        );
+      });
+
+      mapInstanceRef.current = map;
+    } else {
+      // Update Tile Layer if changed
+      if (tileLayerRef.current) {
+        tileLayerRef.current.setUrl(tileProviders[activeLayer]);
+      }
+    }
+  }, [activeLayer]);
+
+  // Handle Zoom In / Out Controls
+  const handleZoomIn = () => {
+    if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
+  };
+
+  const handleZoomOut = () => {
+    if (mapInstanceRef.current) mapInstanceRef.current.zoomOut();
+  };
+
+  const handleRecenter = () => {
+    if (mapInstanceRef.current) mapInstanceRef.current.setView(FOREST_CENTER, 13);
+  };
 
   return (
     <div
@@ -137,33 +297,42 @@ export default function EcosystemMap({ onSelectSite }) {
         isFullscreen ? 'fixed inset-4 z-50 shadow-2xl' : 'h-full min-h-[420px]'
       }`}
     >
-      {/* Top Map Action Bar */}
-      <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+      {/* Top Map Header Bar */}
+      <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-white shrink-0 z-10">
         <div className="flex items-center gap-3">
-          {/* Green Title Badge matching reference */}
+          {/* Green Title Badge */}
           <div className="bg-[#10b981] text-slate-950 font-black text-sm px-2.5 py-1 rounded-md tracking-tight">
             Ecosystem Map
           </div>
 
-          {/* Layer Selector */}
+          {/* Layer Selector Dropdown */}
           <div className="relative group">
             <button className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold transition-all shadow-xs">
               <Layers className="h-3.5 w-3.5" />
               <span>Layers</span>
               <ChevronDown className="h-3 w-3" />
             </button>
-            <div className="hidden group-hover:block absolute top-full left-0 mt-1 w-44 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-30 text-xs font-medium">
-              {['Topographic / Biomes', 'Satellite Sentinel-2', 'Risk Polygons (PostGIS)', 'Acoustic Heatmap'].map((l, i) => (
+            <div className="hidden group-hover:block absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 text-xs font-medium">
+              {Object.keys(tileProviders).map((layerName) => (
                 <button
-                  key={i}
-                  onClick={() => setActiveLayer(l)}
-                  className="w-full text-left px-3 py-1.5 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 font-semibold transition-colors"
+                  key={layerName}
+                  onClick={() => setActiveLayer(layerName)}
+                  className={`w-full text-left px-3 py-1.5 transition-colors font-semibold flex items-center justify-between ${
+                    activeLayer === layerName
+                      ? 'bg-emerald-50 text-emerald-700 font-bold'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  }`}
                 >
-                  {l}
+                  <span>{layerName}</span>
+                  {activeLayer === layerName && <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded">Active</span>}
                 </button>
               ))}
             </div>
           </div>
+
+          <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline-block">
+            Kaziranga Biosphere Forest • 26.58° N, 93.17° E
+          </span>
         </div>
 
         {/* Right Controls */}
@@ -188,140 +357,23 @@ export default function EcosystemMap({ onSelectSite }) {
             {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
           </button>
 
-          <button className="p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 transition-colors shadow-2xs">
+          <button
+            onClick={handleRecenter}
+            className="p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 transition-colors shadow-2xs"
+            title="Recenter Map"
+          >
             <MoreHorizontal className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Map Graphic Canvas */}
-      <div className="relative flex-1 bg-[#dbeee0] overflow-hidden min-h-[340px] select-none">
-        {/* Soft Organic Biome Blobs, Elevation Curves, and Snaking River */}
-        <div className="absolute inset-0 pointer-events-none">
-          <svg className="w-full h-full" viewBox="0 0 1000 580" preserveAspectRatio="none">
-            {/* Base Terrain Shading Layer 1 */}
-            <path d="M0,0 C300,100 600,0 1000,80 L1000,580 L0,580 Z" fill="#d2e8d7" opacity="0.6"/>
-            <path d="M0,280 C250,220 700,340 1000,240 L1000,580 L0,580 Z" fill="#c7e2cd" opacity="0.5"/>
+      {/* Real Interactive Leaflet Forest Map Container */}
+      <div className="relative flex-1 bg-slate-900 overflow-hidden min-h-[350px]">
+        <div ref={mapContainerRef} className="w-full h-full z-0" />
 
-            {/* Circular Biome Patches matching screenshot */}
-            {/* Top-Left Biome */}
-            <ellipse cx="340" cy="220" rx="160" ry="120" fill="#bcdbbd" opacity="0.5" />
-            {/* Bottom-Left Biome */}
-            <circle cx="270" cy="460" r="90" fill="#bcdbbd" opacity="0.5" />
-            {/* Top-Right Biome */}
-            <ellipse cx="680" cy="240" rx="140" ry="100" fill="#bcdbbd" opacity="0.5" />
-
-            {/* Topographic Contour Dashed Lines */}
-            <path d="M120,80 C320,240 600,150 900,240" stroke="#a2c8a2" strokeWidth="1.2" fill="none" strokeDasharray="3 3"/>
-            <path d="M50,420 C360,290 680,480 1000,380" stroke="#a2c8a2" strokeWidth="1.2" fill="none" strokeDasharray="4 3"/>
-
-            {/* Realistic Snaking River Tributary */}
-            <path
-              d="M520,0 C500,130 470,220 500,270 C530,320 620,380 640,460 C660,510 700,580 700,580"
-              stroke="#9ec4db"
-              strokeWidth="15"
-              fill="none"
-              strokeLinecap="round"
-            />
-            {/* River highlight line */}
-            <path
-              d="M520,0 C500,130 470,220 500,270 C530,320 620,380 640,460 C660,510 700,580 700,580"
-              stroke="#b5d6ec"
-              strokeWidth="4"
-              fill="none"
-              strokeLinecap="round"
-              opacity="0.8"
-            />
-          </svg>
-        </div>
-
-        {/* High Risk Perimeter Polygon (Red Dashed + Soft Mint Green Fill) */}
-        <div className="absolute inset-0 pointer-events-none">
-          <svg className="w-full h-full" viewBox="0 0 1000 580" preserveAspectRatio="none">
-            <polygon
-              points="388,272 505,225 530,285 522,312 426,350 388,272"
-              fill="rgba(167, 243, 208, 0.55)"
-              stroke="#ef4444"
-              strokeWidth="2.5"
-              strokeDasharray="6 3"
-              className="transition-all"
-            />
-          </svg>
-        </div>
-
-        {/* Interactive Double-Ringed Site Pins matching reference */}
-        {sites.map((site) => (
-          <div
-            key={site.id}
-            style={{ top: site.top, left: site.left }}
-            className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer z-10 group"
-            onClick={() => {
-              setSelectedPin(site);
-              onSelectSite && onSelectSite(site);
-            }}
-          >
-            {/* Outer Soft Glow Halo Ring */}
-            <div className={`h-9 w-9 rounded-full ${site.haloColor} ring-4 flex items-center justify-center transition-transform group-hover:scale-125`}>
-              {/* Inner Solid Circle */}
-              <div className={`h-6 w-6 rounded-full ${site.coreColor} shadow-md flex items-center justify-center text-[11px] font-bold`}>
-                <span>{site.glyph}</span>
-              </div>
-            </div>
-
-            {/* Quick Hover Name Badge */}
-            <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 text-white text-[11px] font-semibold py-1 px-2.5 rounded-lg whitespace-nowrap shadow-xl z-30 pointer-events-none">
-              {site.name}
-              <div className="text-[9px] text-emerald-400 font-medium">{site.type}</div>
-            </div>
-          </div>
-        ))}
-
-        {/* Pin Details Drawer Popup Bubble */}
-        {selectedPin && (
-          <div
-            style={{ top: selectedPin.top, left: selectedPin.left }}
-            className="absolute -translate-x-1/2 translate-y-6 z-40 bg-white rounded-2xl border border-slate-200 shadow-2xl p-4 w-72 text-left animate-in fade-in zoom-in-95 duration-150"
-          >
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 leading-tight">
-                  {selectedPin.name}
-                </h4>
-                <p className="text-[10px] font-medium text-slate-500 mt-0.5">
-                  {selectedPin.type}
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedPin(null)}
-                className="text-slate-400 hover:text-slate-700 text-xs font-bold p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-1.5 text-[11px] bg-slate-50 p-2.5 rounded-xl border border-slate-100 mb-2.5">
-              <div className="flex justify-between">
-                <span className="text-slate-500">Status:</span>
-                <span className="font-semibold text-slate-800">{selectedPin.status}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Telemetry:</span>
-                <span className="font-semibold text-emerald-700 truncate max-w-[140px]">{selectedPin.species}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setSelectedPin(null)}
-              className="w-full py-1.5 text-center text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors shadow-xs"
-            >
-              Inspect Sensor Stream
-            </button>
-          </div>
-        )}
-
-        {/* Map Legend Floating Card matching screenshot */}
+        {/* Floating Map Legend Card */}
         {showLegend && (
-          <div className="absolute top-4 left-4 bg-white rounded-2xl p-4 border border-slate-200/90 shadow-md text-xs font-medium space-y-2.5 z-20 w-48 animate-in fade-in duration-200">
+          <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md rounded-2xl p-4 border border-slate-200/90 shadow-lg text-xs font-medium space-y-2.5 z-10 w-52 animate-in fade-in duration-200">
             <div className="font-extrabold text-slate-900 text-[11px] uppercase tracking-wider">
               MAP LEGEND
             </div>
@@ -352,21 +404,74 @@ export default function EcosystemMap({ onSelectSite }) {
           </div>
         )}
 
+        {/* Selected Sensor Station Drawer Details */}
+        {selectedSite && (
+          <div className="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-4 max-w-sm w-full text-left animate-in slide-in-from-bottom-4 duration-200">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 leading-tight">
+                  {selectedSite.name}
+                </h4>
+                <p className="text-[10px] font-semibold text-emerald-600 mt-0.5">
+                  {selectedSite.type}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedSite(null)}
+                className="text-slate-400 hover:text-slate-700 text-xs font-bold p-1 rounded-md"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-[11px] text-slate-600 mb-2.5 bg-slate-50 p-2 rounded-lg border border-slate-100">
+              {selectedSite.details}
+            </p>
+
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              <span className="font-bold text-slate-500">Status:</span>
+              <span
+                className={`font-bold px-2 py-0.5 rounded text-[10px] ${
+                  selectedSite.severity === 'critical'
+                    ? 'bg-rose-100 text-rose-700'
+                    : selectedSite.severity === 'moderate'
+                    ? 'bg-amber-100 text-amber-800'
+                    : 'bg-emerald-100 text-emerald-800'
+                }`}
+              >
+                {selectedSite.status}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Bottom Left Scale Indicator */}
-        <div className="absolute bottom-4 left-4 bg-white px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold text-slate-800 border border-slate-200 shadow-sm flex items-center gap-2.5">
+        <div className="absolute bottom-4 left-4 z-10 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold text-slate-800 border border-slate-200 shadow-sm flex items-center gap-2.5">
           <span>2 km</span>
           <div className="w-14 h-1.5 bg-slate-900 rounded-xs" />
         </div>
 
-        {/* Bottom Right Floating Map Zoom & Layer Controls */}
-        <div className="absolute bottom-4 right-4 flex flex-col gap-1.5 z-20">
-          <button className="h-8 w-8 rounded-xl bg-white hover:bg-slate-50 text-slate-900 font-bold text-base shadow-md border border-slate-200 flex items-center justify-center transition-transform hover:scale-105">
+        {/* Bottom Right Zoom & Control Buttons */}
+        <div className="absolute bottom-4 right-4 flex flex-col gap-1.5 z-10">
+          <button
+            onClick={handleZoomIn}
+            className="h-8 w-8 rounded-xl bg-white/95 hover:bg-white text-slate-900 font-bold text-base shadow-md border border-slate-200 flex items-center justify-center transition-transform hover:scale-105"
+            title="Zoom In"
+          >
             +
           </button>
-          <button className="h-8 w-8 rounded-xl bg-white hover:bg-slate-50 text-slate-900 font-bold text-base shadow-md border border-slate-200 flex items-center justify-center transition-transform hover:scale-105">
+          <button
+            onClick={handleZoomOut}
+            className="h-8 w-8 rounded-xl bg-white/95 hover:bg-white text-slate-900 font-bold text-base shadow-md border border-slate-200 flex items-center justify-center transition-transform hover:scale-105"
+            title="Zoom Out"
+          >
             −
           </button>
-          <button className="h-8 w-8 rounded-xl bg-white hover:bg-slate-50 text-slate-900 shadow-md border border-slate-200 flex items-center justify-center text-xs transition-transform hover:scale-105" title="Layer protection status">
+          <button
+            onClick={handleRecenter}
+            className="h-8 w-8 rounded-xl bg-white/95 hover:bg-white text-slate-900 shadow-md border border-slate-200 flex items-center justify-center text-xs transition-transform hover:scale-105"
+            title="Center Forest Reserve"
+          >
             🛡️
           </button>
         </div>
