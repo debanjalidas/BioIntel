@@ -1,61 +1,72 @@
 import React from 'react';
-import { Mic, Dna, ClipboardList, Satellite, ChevronRight } from 'lucide-react';
+import { Mic, Dna, ClipboardList, Satellite } from 'lucide-react';
 
-export const detectionsList = [
-  {
-    id: 1,
-    commonName: 'Green Bee-eater',
-    scientificName: 'Merops orientalis',
-    type: 'Bioacoustic',
-    confidence: '98%',
-    typeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200/80',
-    icon: Mic,
-    image: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=500&auto=format&fit=crop&q=80',
-    audioSample: 'https://cdn.freesound.org/previews/512/512134_7037-lq.mp3',
-  },
-  {
-    id: 2,
-    commonName: 'Chital Deer',
-    scientificName: 'Axis axis',
-    type: 'eDNA',
-    confidence: '95%',
-    typeColor: 'text-indigo-700 bg-indigo-50 border-indigo-200/80',
-    icon: Dna,
-    image: 'https://images.unsplash.com/photo-1547970810-dc1eac8161a7?w=500&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 3,
-    commonName: 'Indian Tree Frog',
-    scientificName: 'Polypedates maculatus',
-    type: 'Ground Survey',
-    confidence: '90%',
-    typeColor: 'text-sky-700 bg-sky-50 border-sky-200/80',
-    icon: ClipboardList,
-    image: 'https://images.unsplash.com/photo-1579380656108-328e1a387cb0?w=500&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 4,
-    commonName: 'Common Mormon',
-    scientificName: 'Papilio polytes',
-    type: 'Bioacoustic',
-    confidence: '92%',
-    typeColor: 'text-emerald-700 bg-emerald-50 border-emerald-200/80',
-    icon: Mic,
-    image: 'https://images.unsplash.com/photo-1535083783855-76ae62b2914e?w=500&auto=format&fit=crop&q=80',
-  },
-  {
-    id: 5,
-    commonName: 'Sacred Fig',
-    scientificName: 'Ficus religiosa',
-    type: 'Remote Sensing',
-    confidence: '85%',
-    typeColor: 'text-amber-700 bg-amber-50 border-amber-200/80',
-    icon: Satellite,
-    image: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=500&auto=format&fit=crop&q=80',
-  },
-];
+const FALLBACK_GROUP_IMAGES = {
+  Mammalia: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=600&q=80',
+  Aves: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=600&q=80',
+  Reptilia: 'https://images.unsplash.com/photo-1527525443983-6e60c75fff46?auto=format&fit=crop&w=600&q=80',
+  Amphibia: 'https://images.unsplash.com/photo-1579380656108-328e1a387cb0?auto=format&fit=crop&w=600&q=80',
+  Actinopterygii: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=600&q=80',
+  Plantae: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+  Insecta: 'https://images.unsplash.com/photo-1535083783855-76ae62b2914e?auto=format&fit=crop&w=600&q=80',
+};
 
-export default function RecentDetections({ onSelectDetection, onViewAll }) {
+export default function RecentDetections({
+  detections = [],
+  speciesList = [],
+  onSelectDetection,
+  onViewAll,
+}) {
+  // If real detections passed, format them. Otherwise fallback to formatted species from catalog.
+  let itemsToRender = [];
+
+  if (detections && detections.length > 0) {
+    itemsToRender = detections.slice(0, 5).map((d, idx) => {
+      // Look up species catalog image
+      const spMatch = speciesList.find(
+        (s) =>
+          (s.scientific_name && d.scientific_name && s.scientific_name.toLowerCase() === d.scientific_name.toLowerCase()) ||
+          (s.common_name && d.common_name && s.common_name.toLowerCase() === d.common_name.toLowerCase())
+      );
+
+      const type = d.recording_file ? 'Bioacoustic' : (d.assay_type ? 'eDNA' : 'Ground Survey');
+      const Icon = type === 'Bioacoustic' ? Mic : type === 'eDNA' ? Dna : ClipboardList;
+      const conf = d.model_confidence ? `${Math.round(d.model_confidence * 100)}%` : '95%';
+
+      const img =
+        spMatch?.image_url ||
+        FALLBACK_GROUP_IMAGES[d.taxonomic_group] ||
+        FALLBACK_GROUP_IMAGES['Aves'];
+
+      return {
+        id: d.detection_id || idx + 1,
+        commonName: d.common_name || spMatch?.common_name || 'Forest Species',
+        scientificName: d.scientific_name || spMatch?.scientific_name || 'Species sp.',
+        type: type,
+        confidence: conf,
+        icon: Icon,
+        image: img,
+      };
+    });
+  } else if (speciesList && speciesList.length > 0) {
+    itemsToRender = speciesList.slice(0, 5).map((sp, idx) => {
+      const types = ['Bioacoustic', 'eDNA', 'Ground Survey', 'Bioacoustic', 'Remote Sensing'];
+      const confs = ['98%', '95%', '92%', '89%', '94%'];
+      const t = types[idx % types.length];
+      const Icon = t === 'Bioacoustic' ? Mic : t === 'eDNA' ? Dna : t === 'Remote Sensing' ? Satellite : ClipboardList;
+
+      return {
+        id: sp.id || idx + 1,
+        commonName: sp.common_name,
+        scientificName: sp.scientific_name,
+        type: t,
+        confidence: confs[idx % confs.length],
+        icon: Icon,
+        image: sp.image_url || FALLBACK_GROUP_IMAGES[sp.taxonomic_group] || FALLBACK_GROUP_IMAGES['Mammalia'],
+      };
+    });
+  }
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
       {/* Header with View All */}
@@ -73,7 +84,7 @@ export default function RecentDetections({ onSelectDetection, onViewAll }) {
 
       {/* 5 Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-        {detectionsList.map((item) => {
+        {itemsToRender.map((item) => {
           const Icon = item.icon;
           return (
             <div
@@ -88,6 +99,10 @@ export default function RecentDetections({ onSelectDetection, onViewAll }) {
                   alt={item.commonName}
                   className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-300"
                   loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = FALLBACK_GROUP_IMAGES['Mammalia'];
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-60" />
               </div>
@@ -120,3 +135,4 @@ export default function RecentDetections({ onSelectDetection, onViewAll }) {
     </div>
   );
 }
+

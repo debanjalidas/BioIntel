@@ -1,26 +1,50 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { ChevronDown } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { bioApi } from '../services/api';
 
-const data = [
-  { name: 'Bioacoustics', value: 35, color: '#22c55e' },
-  { name: 'eDNA Samples', value: 25, color: '#6366f1' },
-  { name: 'Remote Sensing', value: 20, color: '#0ea5e9' },
-  { name: 'Ground Surveys', value: 15, color: '#eab308' },
-  { name: 'Others', value: 5, color: '#94a3b8' },
-];
+export default function DataSourcesChart({ dataSources: propDataSources }) {
+  const [data, setData] = useState([]);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-export default function DataSourcesChart() {
+  useEffect(() => {
+    if (propDataSources && propDataSources.items) {
+      setData(propDataSources.items);
+      setTotalRecords(propDataSources.total_records || 0);
+    } else {
+      fetchBreakdown();
+    }
+  }, [propDataSources]);
+
+  const fetchBreakdown = async () => {
+    setIsLoading(true);
+    try {
+      const res = await bioApi.getDataSourcesBreakdown();
+      if (res && res.items) {
+        setData(res.items);
+        setTotalRecords(res.total_records || 0);
+      }
+    } catch (err) {
+      console.warn('Error fetching real data sources breakdown:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
-      {/* Header with Period Dropdown */}
+      {/* Header with Refresh Button */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-bold text-slate-900 tracking-tight">
           Data Sources Overview
         </h3>
-        <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-600 border border-slate-200/80 transition-colors">
-          <span>This Month</span>
-          <ChevronDown className="h-3 w-3 text-slate-400" />
+        <button
+          onClick={fetchBreakdown}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-600 border border-slate-200/80 transition-colors"
+        >
+          <span>Live Ingestion</span>
+          <RefreshCw className={`h-3 w-3 text-slate-400 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
@@ -45,7 +69,7 @@ export default function DataSourcesChart() {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(val) => [`${val}%`, 'Share']}
+                formatter={(val, name, props) => [`${val}% (${props.payload.count || ''} records)`, props.payload.name]}
                 contentStyle={{
                   borderRadius: '0.75rem',
                   fontSize: '12px',
@@ -61,7 +85,7 @@ export default function DataSourcesChart() {
           {/* Center Metric Text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span className="text-base font-extrabold text-slate-900 leading-tight">
-              1,248
+              {totalRecords.toLocaleString()}
             </span>
             <span className="text-[10px] font-medium text-slate-400">
               Total Records
@@ -92,3 +116,4 @@ export default function DataSourcesChart() {
     </div>
   );
 }
+

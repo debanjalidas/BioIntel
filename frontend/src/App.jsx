@@ -3,7 +3,7 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import StatCards from './components/StatCards';
 import EcosystemMap from './components/EcosystemMap';
-import RecentAlerts, { alertsList } from './components/RecentAlerts';
+import RecentAlerts from './components/RecentAlerts';
 import BiodiversityTrendChart from './components/BiodiversityTrendChart';
 import DataSourcesChart from './components/DataSourcesChart';
 import HabitatConditionChart from './components/HabitatConditionChart';
@@ -48,10 +48,14 @@ export default function App() {
   const [selectedDetection, setSelectedDetection] = useState(null);
   const [selectedSite, setSelectedSite] = useState(null);
 
-  // Dynamic Live Data States for Species and Acoustics
+  // Dynamic Live Data States from API
   const [speciesList, setSpeciesList] = useState([]);
   const [acousticList, setAcousticList] = useState([]);
   const [alertsData, setAlertsData] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [trendData, setTrendData] = useState([]);
+  const [dataSourcesData, setDataSourcesData] = useState(null);
+  const [habitatData, setHabitatData] = useState(null);
   const [isLoadingMain, setIsLoadingMain] = useState(false);
 
   // Live PAM Acoustic ML Predictor State
@@ -70,16 +74,26 @@ export default function App() {
   const loadGlobalData = async () => {
     setIsLoadingMain(true);
     try {
-      const [spRes, acRes, alRes] = await Promise.all([
+      const [spRes, acRes, alRes, statsRes, trendRes, dsRes, habRes] = await Promise.all([
         bioApi.getSpecies({ limit: 100 }),
         bioApi.getAcousticDetections({ limit: 100 }),
         bioApi.getAlerts(),
+        bioApi.getDashboardStats(),
+        bioApi.getBiodiversityTrends(),
+        bioApi.getDataSourcesBreakdown(),
+        bioApi.getHabitatConditions(),
       ]);
-      setSpeciesList(spRes.items || []);
-      setAcousticList(acRes.items || []);
-      setAlertsData(alRes.items || alertsList);
+      setSpeciesList(spRes?.items || []);
+      setAcousticList(acRes?.items || []);
+      setAlertsData(alRes?.items || []);
+      setDashboardStats(statsRes || null);
+      if (trendRes?.daily_trend) {
+        setTrendData(trendRes.daily_trend);
+      }
+      setDataSourcesData(dsRes || null);
+      setHabitatData(habRes || null);
     } catch (err) {
-      console.warn('API error, using defaults:', err);
+      console.warn('API error fetching global dataset:', err);
     } finally {
       setIsLoadingMain(false);
     }
@@ -129,6 +143,7 @@ export default function App() {
           {activeTab === 'dashboard' && (
             <div className="space-y-6 max-w-[1600px] mx-auto">
               <StatCards
+                stats={dashboardStats}
                 onCardClick={(cardId) => {
                   if (cardId === 'alerts' || cardId === 'risks') setActiveTab('alerts');
                   else if (cardId === 'species') setActiveTab('species');
@@ -142,6 +157,7 @@ export default function App() {
                 </div>
                 <div className="min-h-[400px]">
                   <RecentAlerts
+                    alerts={alertsData}
                     onSelectAlert={(alert) => {
                       setSelectedAlert(alert);
                       setModalActionType('create_alert');
@@ -153,14 +169,16 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <BiodiversityTrendChart />
-                <DataSourcesChart />
-                <HabitatConditionChart />
+                <BiodiversityTrendChart trendData={trendData} />
+                <DataSourcesChart dataSources={dataSourcesData} />
+                <HabitatConditionChart conditionData={habitatData} />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                 <div className="lg:col-span-8">
                   <RecentDetections
+                    detections={acousticList}
+                    speciesList={speciesList}
                     onSelectDetection={(item) => setSelectedDetection(item)}
                     onViewAll={() => setActiveTab('species')}
                   />
@@ -215,7 +233,7 @@ export default function App() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {speciesList.map((item) => {
                   const fallbackMap = {
-                    Mammalia: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&w=600&q=80',
+                    Mammalia: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=600&q=80',
                     Aves: 'https://images.unsplash.com/photo-1549608276-5786777e6587?auto=format&fit=crop&w=600&q=80',
                     Reptilia: 'https://images.unsplash.com/photo-1527525443983-6e60c75fff46?auto=format&fit=crop&w=600&q=80',
                     Amphibia: 'https://images.unsplash.com/photo-1508817628294-5a453fa0b8fb?auto=format&fit=crop&w=600&q=80',

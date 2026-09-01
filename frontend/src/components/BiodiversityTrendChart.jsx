@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AreaChart,
   Area,
@@ -8,17 +8,8 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { ChevronDown } from 'lucide-react';
-
-const data = [
-  { day: '12 May', value: 20 },
-  { day: '13 May', value: 48 },
-  { day: '14 May', value: 35 },
-  { day: '15 May', value: 62 },
-  { day: '16 May', value: 54 },
-  { day: '17 May', value: 76 },
-  { day: '18 May', value: 78 },
-];
+import { ChevronDown, RefreshCw } from 'lucide-react';
+import { bioApi } from '../services/api';
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -32,7 +23,41 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-export default function BiodiversityTrendChart() {
+export default function BiodiversityTrendChart({ trendData: propTrendData }) {
+  const [trendData, setTrendData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (propTrendData && propTrendData.length > 0) {
+      setTrendData(propTrendData);
+    } else {
+      fetchTrend();
+    }
+  }, [propTrendData]);
+
+  const fetchTrend = async () => {
+    setIsLoading(true);
+    try {
+      const res = await bioApi.getBiodiversityTrends();
+      if (res && res.daily_trend && res.daily_trend.length > 0) {
+        setTrendData(res.daily_trend);
+      } else if (res && res.months && res.months.length > 0) {
+        const formatted = res.months.slice(-7).map((m, idx) => ({
+          day: m,
+          value: Math.round((res.shannon_diversity_index[idx] || 3.5) * 20),
+        }));
+        setTrendData(formatted);
+      }
+    } catch (err) {
+      console.warn('Error fetching real biodiversity trend:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const latestVal = trendData.length > 0 ? trendData[trendData.length - 1].value : '--';
+  const latestDay = trendData.length > 0 ? trendData[trendData.length - 1].day : '';
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
       {/* Header with Period Dropdown */}
@@ -40,9 +65,12 @@ export default function BiodiversityTrendChart() {
         <h3 className="text-sm font-bold text-slate-900 tracking-tight">
           Biodiversity Trend
         </h3>
-        <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-600 border border-slate-200/80 transition-colors">
-          <span>This Month</span>
-          <ChevronDown className="h-3 w-3 text-slate-400" />
+        <button
+          onClick={fetchTrend}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-600 border border-slate-200/80 transition-colors"
+        >
+          <span>Live Index</span>
+          <RefreshCw className={`h-3 w-3 text-slate-400 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
@@ -50,7 +78,7 @@ export default function BiodiversityTrendChart() {
       <div className="h-48 w-full relative">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
-            data={data}
+            data={trendData}
             margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
           >
             <defs>
@@ -96,10 +124,13 @@ export default function BiodiversityTrendChart() {
         </ResponsiveContainer>
 
         {/* Current Pin Pill Marker */}
-        <div className="absolute top-2 right-4 bg-emerald-900 text-white px-2 py-0.5 rounded text-[10px] font-bold shadow-md hidden sm:block">
-          78 <span className="font-normal text-emerald-300">18 May</span>
-        </div>
+        {latestDay && (
+          <div className="absolute top-2 right-4 bg-emerald-900 text-white px-2 py-0.5 rounded text-[10px] font-bold shadow-md hidden sm:block">
+            {latestVal} <span className="font-normal text-emerald-300">{latestDay}</span>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

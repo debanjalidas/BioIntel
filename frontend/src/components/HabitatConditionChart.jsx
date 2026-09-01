@@ -1,25 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { ChevronDown } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { bioApi } from '../services/api';
 
-const data = [
-  { name: 'Good', value: 68, color: '#22c55e' },
-  { name: 'Moderate', value: 20, color: '#f59e0b' },
-  { name: 'Poor', value: 8, color: '#f43f5e' },
-  { name: 'Critical', value: 4, color: '#e11d48' },
-];
+export default function HabitatConditionChart({ conditionData: propConditionData }) {
+  const [breakdown, setBreakdown] = useState([]);
+  const [dominantCondition, setDominantCondition] = useState('Good');
+  const [dominantPercent, setDominantPercent] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-export default function HabitatConditionChart() {
+  useEffect(() => {
+    if (propConditionData && propConditionData.breakdown) {
+      setBreakdown(propConditionData.breakdown);
+      setDominantCondition(propConditionData.dominant_condition || 'Good');
+      setDominantPercent(propConditionData.dominant_percent || 0);
+    } else {
+      fetchConditions();
+    }
+  }, [propConditionData]);
+
+  const fetchConditions = async () => {
+    setIsLoading(true);
+    try {
+      const res = await bioApi.getHabitatConditions();
+      if (res && res.breakdown) {
+        setBreakdown(res.breakdown);
+        setDominantCondition(res.dominant_condition || 'Good');
+        setDominantPercent(res.dominant_percent || 0);
+      }
+    } catch (err) {
+      console.warn('Error fetching real habitat conditions:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs flex flex-col justify-between">
-      {/* Header with Filter Dropdown */}
+      {/* Header with Refresh */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-bold text-slate-900 tracking-tight">
           Habitat Condition
         </h3>
-        <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-600 border border-slate-200/80 transition-colors">
-          <span>By Area</span>
-          <ChevronDown className="h-3 w-3 text-slate-400" />
+        <button
+          onClick={fetchConditions}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-600 border border-slate-200/80 transition-colors"
+        >
+          <span>Sentinel-2</span>
+          <RefreshCw className={`h-3 w-3 text-slate-400 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
@@ -30,7 +58,7 @@ export default function HabitatConditionChart() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data}
+                data={breakdown}
                 cx="50%"
                 cy="50%"
                 innerRadius={48}
@@ -39,12 +67,12 @@ export default function HabitatConditionChart() {
                 dataKey="value"
                 strokeWidth={0}
               >
-                {data.map((entry, index) => (
+                {breakdown.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip
-                formatter={(val) => [`${val}%`, 'Coverage']}
+                formatter={(val, name, props) => [`${val}%`, props.payload.name]}
                 contentStyle={{
                   borderRadius: '0.75rem',
                   fontSize: '12px',
@@ -60,17 +88,25 @@ export default function HabitatConditionChart() {
           {/* Center Metric Text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span className="text-base font-extrabold text-slate-900 leading-tight">
-              68%
+              {dominantPercent}%
             </span>
-            <span className="text-[10px] font-bold text-emerald-600">
-              Good
+            <span
+              className={`text-[10px] font-bold ${
+                dominantCondition === 'Good' || dominantCondition === 'Optimal'
+                  ? 'text-emerald-600'
+                  : dominantCondition === 'Moderate'
+                  ? 'text-amber-600'
+                  : 'text-rose-600'
+              }`}
+            >
+              {dominantCondition}
             </span>
           </div>
         </div>
 
         {/* Legend Breakdown */}
         <div className="space-y-1.5 flex-1 pl-2">
-          {data.map((item, idx) => (
+          {breakdown.map((item, idx) => (
             <div key={idx} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <span
@@ -91,3 +127,4 @@ export default function HabitatConditionChart() {
     </div>
   );
 }
+

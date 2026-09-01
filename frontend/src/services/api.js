@@ -178,7 +178,16 @@ export const bioApi = {
       const res = await apiClient.get('/analytics/data-sources-breakdown');
       return res.data;
     } catch (err) {
-      return [];
+      return null;
+    }
+  },
+
+  getHabitatConditions: async () => {
+    try {
+      const res = await apiClient.get('/analytics/habitat-conditions');
+      return res.data;
+    } catch (err) {
+      return null;
     }
   },
 
