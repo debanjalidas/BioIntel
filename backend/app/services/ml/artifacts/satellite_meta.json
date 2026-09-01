@@ -1,0 +1,17 @@
+{
+  "model": "RandomForestRegressor",
+  "features": [
+    "ndvi_mean",
+    "evi_mean",
+    "ndre_mean",
+    "canopy_cover_percent",
+    "surface_temperature_c",
+    "monthly_precipitation_mm",
+    "vegetation_density_ratio",
+    "canopy_stress_index"
+  ],
+  "r2_score": 0.8417,
+  "mse": 0.1497,
+  "training_samples": 120,
+  "trained_at": "2026-09-01T08:31:39.855493"
+}

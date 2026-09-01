@@ -1,0 +1,16 @@
+{
+  "regressor": "GradientBoostingRegressor",
+  "classifier": "RandomForestClassifier",
+  "features": [
+    "depth_meters",
+    "water_temperature_c",
+    "ph_level",
+    "dissolved_oxygen_mg_l",
+    "turbidity_ntu",
+    "filtration_volume_ml"
+  ],
+  "r2_score": 0.994,
+  "invasive_accuracy": 0.9818,
+  "training_samples": 55,
+  "trained_at": "2026-09-01T08:31:39.252913"
+}

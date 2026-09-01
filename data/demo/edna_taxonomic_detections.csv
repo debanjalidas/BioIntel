@@ -1,0 +1,131 @@
+detection_id,sample_code,site_name,scientific_name,common_name,taxonomic_group,conservation_status,is_invasive,read_count,relative_abundance,sequence_match_identity,primer_target,verification_status
+1,EDNA-2026-SND-052,Sundarbans Mangrove Biosphere,Ficus benghalensis,Banyan Tree,Plantae,LC,False,4226,0.0066,98.91,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+2,EDNA-2025-NAM-009,Namdapha Eastern Himalayan Wilderness,Tenualosa ilisha,Hilsa Shad,Actinopterygii,LC,False,16365,0.02876,98.14,COI (Invertebrate),VERIFIED_EXPERT
+3,EDNA-2025-CBT-029,Jim Corbett Himalayan Foothills,Tor putitora,Golden Mahseer,Actinopterygii,EN,False,6509,0.00834,98.84,16S rRNA (Fish/Amphibian),VERIFIED_AI
+4,EDNA-2025-PER-025,Periyar Cardamom Hills Watershed,Ailurus fulgens,Red Panda,Mammalia,EN,False,5219,0.01657,97.97,18S rRNA (Eukaryote),VERIFIED_EXPERT
+5,EDNA-2025-SND-036,Sundarbans Mangrove Biosphere,Pitta brachyura,Indian Pitta,Aves,LC,False,31867,0.03686,98.02,COI (Invertebrate),VERIFIED_AI
+6,EDNA-2026-SND-001,Sundarbans Mangrove Biosphere,Pitta brachyura,Indian Pitta,Aves,LC,False,12903,0.02189,99.91,12S rRNA (Vertebrate),VERIFIED_EXPERT
+7,EDNA-2025-WGH-049,Western Ghats Rainforest Corridor,Troides minos,Southern Birdwing,Insecta,LC,False,16348,0.06189,99.24,16S rRNA (Fish/Amphibian),VERIFIED_AI
+8,EDNA-2025-WGH-016,Western Ghats Rainforest Corridor,Rhacophorus malabaricus,Malabar Gliding Frog,Amphibia,LC,False,19000,0.035,98.45,18S rRNA (Eukaryote),VERIFIED_EXPERT
+9,EDNA-2026-PER-020,Periyar Cardamom Hills Watershed,Eurystomus orientalis,Dollarbird,Aves,LC,False,24019,0.02574,98.78,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+10,EDNA-2026-SND-052,Sundarbans Mangrove Biosphere,Prosopis juliflora,Mesquite Shrub,Plantae,LC,True,21436,0.03348,99.79,COI (Invertebrate),VERIFIED_AI
+11,EDNA-2026-GIR-003,Gir Asiatic Lion Sanctuary,Bubo bubo,Eurasian Eagle-Owl,Aves,LC,False,10013,0.04068,97.54,18S rRNA (Eukaryote),VERIFIED_EXPERT
+12,EDNA-2025-SND-038,Sundarbans Mangrove Biosphere,Oreochromis niloticus,Nile Tilapia,Actinopterygii,LC,True,19795,0.10434,97.88,COI (Invertebrate),VERIFIED_AI
+13,EDNA-2026-NAM-037,Namdapha Eastern Himalayan Wilderness,Eudynamys scolopaceus,Asian Koel,Aves,LC,False,33172,0.04476,98.88,COI (Invertebrate),VERIFIED_AI
+14,EDNA-2025-CBT-053,Jim Corbett Himalayan Foothills,Apis dorsata,Giant Honeybee,Insecta,LC,False,47869,0.09643,99.1,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+15,EDNA-2026-WGH-047,Western Ghats Rainforest Corridor,Bungarus caeruleus,Common Krait,Reptilia,LC,False,11542,0.02826,97.85,18S rRNA (Eukaryote),VERIFIED_EXPERT
+16,EDNA-2026-MNS-035,Manas Transboundary River Reserve,Cuon alpinus,Dhole / Asiatic Wild Dog,Mammalia,EN,False,34787,0.04098,97.58,12S rRNA (Vertebrate),VERIFIED_EXPERT
+17,EDNA-2026-NAM-043,Namdapha Eastern Himalayan Wilderness,Neofelis nebulosa,Clouded Leopard,Mammalia,VU,False,868,0.00105,98.53,16S rRNA (Fish/Amphibian),VERIFIED_AI
+18,EDNA-2025-NAM-010,Namdapha Eastern Himalayan Wilderness,Elephas maximus,Asian Elephant,Mammalia,EN,False,14784,0.02045,98.76,COI (Invertebrate),VERIFIED_AI
+19,EDNA-2026-PER-041,Periyar Cardamom Hills Watershed,Troides minos,Southern Birdwing,Insecta,LC,False,43656,0.09627,98.72,12S rRNA (Vertebrate),VERIFIED_EXPERT
+20,EDNA-2026-GIR-027,Gir Asiatic Lion Sanctuary,Elephas maximus,Asian Elephant,Mammalia,EN,False,1546,0.00193,98.82,COI (Invertebrate),VERIFIED_EXPERT
+21,EDNA-2025-MNS-019,Manas Transboundary River Reserve,Rhinoceros unicornis,Greater One-Horned Rhinoceros,Mammalia,VU,False,33363,0.07639,99.53,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+22,EDNA-2026-KZR-012,Kaziranga Floodplain Sanctuary,Bubalus arnee,Wild Water Buffalo,Mammalia,EN,False,6762,0.00894,98.81,16S rRNA (Fish/Amphibian),VERIFIED_AI
+23,EDNA-2025-GIR-034,Gir Asiatic Lion Sanctuary,Corvus splendens,House Crow,Aves,LC,False,23678,0.06042,98.17,ITS2 (Fungal/Flora),VERIFIED_AI
+24,EDNA-2026-PER-026,Periyar Cardamom Hills Watershed,Rhizophora mangle,Red Mangrove,Plantae,LC,False,37477,0.16973,98.11,16S rRNA (Fish/Amphibian),VERIFIED_AI
+25,EDNA-2025-CBT-053,Jim Corbett Himalayan Foothills,Manis crassicaudata,Indian Pangolin,Mammalia,EN,False,43293,0.08721,99.98,12S rRNA (Vertebrate),VERIFIED_AI
+26,EDNA-2025-PER-025,Periyar Cardamom Hills Watershed,Channa marulius,Great Snakehead,Actinopterygii,LC,False,36671,0.11645,98.69,12S rRNA (Vertebrate),VERIFIED_EXPERT
+27,EDNA-2026-WGH-006,Western Ghats Rainforest Corridor,Atta cephalotes,Leafcutter Ant,Insecta,LC,False,28886,0.03841,99.11,COI (Invertebrate),VERIFIED_EXPERT
+28,EDNA-2026-PER-055,Periyar Cardamom Hills Watershed,Trachypithecus geei,Golden Langur,Mammalia,EN,False,35063,0.03803,99.8,16S rRNA (Fish/Amphibian),VERIFIED_AI
+29,EDNA-2026-KZR-045,Kaziranga Floodplain Sanctuary,Prosopis juliflora,Mesquite Shrub,Plantae,LC,True,18216,0.02334,97.62,12S rRNA (Vertebrate),VERIFIED_EXPERT
+30,EDNA-2025-WGH-018,Western Ghats Rainforest Corridor,Platanista gangetica,Ganges River Dolphin,Mammalia,EN,False,12204,0.0536,99.82,COI (Invertebrate),VERIFIED_AI
+31,EDNA-2025-NAM-014,Namdapha Eastern Himalayan Wilderness,Sus scrofa,Wild Boar,Mammalia,LC,False,47158,0.07893,99.55,12S rRNA (Vertebrate),VERIFIED_AI
+32,EDNA-2026-NAM-037,Namdapha Eastern Himalayan Wilderness,Ciconia boyciana,Oriental Stork,Aves,EN,False,37588,0.05072,99.59,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+33,EDNA-2026-MNS-035,Manas Transboundary River Reserve,Duttaphrynus melanostictus,Asian Common Toad,Amphibia,LC,False,25605,0.03016,99.39,16S rRNA (Fish/Amphibian),VERIFIED_EXPERT
+34,EDNA-2026-KZR-045,Kaziranga Floodplain Sanctuary,Manis crassicaudata,Indian Pangolin,Mammalia,EN,False,33269,0.04262,99.36,COI (Invertebrate),VERIFIED_AI
+35,EDNA-2026-NAM-028,Namdapha Eastern Himalayan Wilderness,Haliaeetus leucogaster,White-Bellied Sea-Eagle,Aves,LC,False,5431,0.01185,98.35,18S rRNA (Eukaryote),VERIFIED_EXPERT
+36,EDNA-2026-PER-026,Periyar Cardamom Hills Watershed,Rhacophorus malabaricus,Malabar Gliding Frog,Amphibia,LC,False,2391,0.01083,99.09,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+37,EDNA-2026-NAM-023,Namdapha Eastern Himalayan Wilderness,Channa marulius,Great Snakehead,Actinopterygii,LC,False,28751,0.1234,97.96,18S rRNA (Eukaryote),VERIFIED_EXPERT
+38,EDNA-2026-WGH-006,Western Ghats Rainforest Corridor,Ophiophagus hannah,King Cobra,Reptilia,VU,False,16601,0.02208,99.28,12S rRNA (Vertebrate),VERIFIED_AI
+39,EDNA-2025-PER-025,Periyar Cardamom Hills Watershed,Macaca radiata,Bonnet Macaque,Mammalia,LC,False,25984,0.08251,98.29,12S rRNA (Vertebrate),VERIFIED_AI
+40,EDNA-2026-PER-020,Periyar Cardamom Hills Watershed,Eichhornia crassipes,Water Hyacinth,Plantae,LC,True,24037,0.02576,99.4,12S rRNA (Vertebrate),VERIFIED_AI
+41,EDNA-2026-KZR-012,Kaziranga Floodplain Sanctuary,Lantana camara,Lantana Weed,Plantae,LC,True,29865,0.03947,98.89,18S rRNA (Eukaryote),VERIFIED_EXPERT
+42,EDNA-2025-NAM-002,Namdapha Eastern Himalayan Wilderness,Loris tardigradus,Slender Loris,Mammalia,EN,False,23644,0.07391,98.89,18S rRNA (Eukaryote),VERIFIED_EXPERT
+43,EDNA-2026-GIR-021,Gir Asiatic Lion Sanctuary,Tenualosa ilisha,Hilsa Shad,Actinopterygii,LC,False,1258,0.00447,98.23,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+44,EDNA-2026-WGH-047,Western Ghats Rainforest Corridor,Eudynamys scolopaceus,Asian Koel,Aves,LC,False,37933,0.09286,98.8,ITS2 (Fungal/Flora),VERIFIED_AI
+45,EDNA-2025-WGH-018,Western Ghats Rainforest Corridor,Varanus salvator,Water Monitor,Reptilia,LC,False,18040,0.07924,98.73,12S rRNA (Vertebrate),VERIFIED_AI
+46,EDNA-2025-WGH-018,Western Ghats Rainforest Corridor,Oreochromis niloticus,Nile Tilapia,Actinopterygii,LC,True,20094,0.08826,98.71,12S rRNA (Vertebrate),VERIFIED_AI
+47,EDNA-2025-WGH-016,Western Ghats Rainforest Corridor,Atta cephalotes,Leafcutter Ant,Insecta,LC,False,39365,0.07252,99.04,ITS2 (Fungal/Flora),VERIFIED_AI
+48,EDNA-2026-PER-020,Periyar Cardamom Hills Watershed,Panthera tigris tigris,Bengal Tiger,Mammalia,EN,False,26382,0.02827,98.33,18S rRNA (Eukaryote),VERIFIED_AI
+49,EDNA-2026-MNS-022,Manas Transboundary River Reserve,Eichhornia crassipes,Water Hyacinth,Plantae,LC,True,22387,0.0645,98.58,18S rRNA (Eukaryote),VERIFIED_AI
+50,EDNA-2026-GIR-021,Gir Asiatic Lion Sanctuary,Sarcogyps calvus,Red-Headed Vulture,Aves,CR,False,31842,0.11311,98.29,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+51,EDNA-2025-MNS-019,Manas Transboundary River Reserve,Apis dorsata,Giant Honeybee,Insecta,LC,False,38190,0.08744,99.45,COI (Invertebrate),VERIFIED_AI
+52,EDNA-2025-CBT-053,Jim Corbett Himalayan Foothills,Wallago attu,Helicopter Catfish,Actinopterygii,VU,False,24371,0.04909,97.78,18S rRNA (Eukaryote),VERIFIED_AI
+53,EDNA-2026-MNS-035,Manas Transboundary River Reserve,Strix aluco,Tawny Owl,Aves,LC,False,45126,0.05316,99.42,12S rRNA (Vertebrate),VERIFIED_EXPERT
+54,EDNA-2025-KZR-030,Kaziranga Floodplain Sanctuary,Alcedo atthis,Common Kingfisher,Aves,LC,False,29184,0.03172,99.49,12S rRNA (Vertebrate),VERIFIED_EXPERT
+55,EDNA-2026-PER-051,Periyar Cardamom Hills Watershed,Dawkinsia denisonii,Denison Barb / Miss Kerala,Actinopterygii,EN,False,44554,0.05108,98.75,COI (Invertebrate),VERIFIED_AI
+56,EDNA-2026-NAM-043,Namdapha Eastern Himalayan Wilderness,Macaca radiata,Bonnet Macaque,Mammalia,LC,False,47323,0.0574,98.56,ITS2 (Fungal/Flora),VERIFIED_AI
+57,EDNA-2026-KZR-039,Kaziranga Floodplain Sanctuary,Troides minos,Southern Birdwing,Insecta,LC,False,38607,0.10102,98.5,18S rRNA (Eukaryote),VERIFIED_EXPERT
+58,EDNA-2026-KZR-045,Kaziranga Floodplain Sanctuary,Oreochromis niloticus,Nile Tilapia,Actinopterygii,LC,True,36078,0.04622,97.59,COI (Invertebrate),VERIFIED_EXPERT
+59,EDNA-2026-SND-052,Sundarbans Mangrove Biosphere,Manis crassicaudata,Indian Pangolin,Mammalia,EN,False,7617,0.0119,99.42,COI (Invertebrate),VERIFIED_AI
+60,EDNA-2026-KZR-040,Kaziranga Floodplain Sanctuary,Ailurus fulgens,Red Panda,Mammalia,EN,False,37361,0.10263,99.96,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+61,EDNA-2026-MNS-022,Manas Transboundary River Reserve,Lantana camara,Lantana Weed,Plantae,LC,True,7393,0.0213,97.53,COI (Invertebrate),VERIFIED_AI
+62,EDNA-2025-KZR-048,Kaziranga Floodplain Sanctuary,Bubo bubo,Eurasian Eagle-Owl,Aves,LC,False,29664,0.06167,98.44,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+63,EDNA-2025-SND-038,Sundarbans Mangrove Biosphere,Anopheles stephensi,Malaria Vector Mosquito,Insecta,LC,False,10329,0.05444,98.36,12S rRNA (Vertebrate),VERIFIED_EXPERT
+64,EDNA-2025-MNS-019,Manas Transboundary River Reserve,Oreochromis niloticus,Nile Tilapia,Actinopterygii,LC,True,6076,0.01391,97.79,16S rRNA (Fish/Amphibian),VERIFIED_AI
+65,EDNA-2026-MNS-022,Manas Transboundary River Reserve,Rhizophora mangle,Red Mangrove,Plantae,LC,False,14007,0.04036,98.8,COI (Invertebrate),VERIFIED_EXPERT
+66,EDNA-2025-CBT-029,Jim Corbett Himalayan Foothills,Avicennia marina,Grey Mangrove,Plantae,LC,False,21350,0.02736,97.67,12S rRNA (Vertebrate),VERIFIED_EXPERT
+67,EDNA-2026-GIR-008,Gir Asiatic Lion Sanctuary,Rhinoceros unicornis,Greater One-Horned Rhinoceros,Mammalia,VU,False,22933,0.10784,99.12,16S rRNA (Fish/Amphibian),VERIFIED_EXPERT
+68,EDNA-2025-KZR-048,Kaziranga Floodplain Sanctuary,Eudynamys scolopaceus,Asian Koel,Aves,LC,False,34266,0.07123,97.94,16S rRNA (Fish/Amphibian),VERIFIED_AI
+69,EDNA-2026-NAM-028,Namdapha Eastern Himalayan Wilderness,Ficus benghalensis,Banyan Tree,Plantae,LC,False,15644,0.03413,99.49,16S rRNA (Fish/Amphibian),VERIFIED_AI
+70,EDNA-2026-NAM-043,Namdapha Eastern Himalayan Wilderness,Lantana camara,Lantana Weed,Plantae,LC,True,26374,0.03199,97.57,18S rRNA (Eukaryote),VERIFIED_EXPERT
+71,EDNA-2025-CBT-029,Jim Corbett Himalayan Foothills,Hypophthalmichthys nobilis,Bighead Carp,Actinopterygii,LC,True,25932,0.03323,97.51,16S rRNA (Fish/Amphibian),VERIFIED_AI
+72,EDNA-2025-WGH-049,Western Ghats Rainforest Corridor,Hoolock hoolock,Western Hoolock Gibbon,Mammalia,EN,False,38287,0.14495,97.75,18S rRNA (Eukaryote),VERIFIED_AI
+73,EDNA-2026-GIR-021,Gir Asiatic Lion Sanctuary,Sarcogyps calvus,Red-Headed Vulture,Aves,CR,False,30436,0.10812,97.78,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+74,EDNA-2026-PER-041,Periyar Cardamom Hills Watershed,Nasikabatrachus sahyadrensis,Purple Frog,Amphibia,EN,False,39573,0.08727,98.47,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+75,EDNA-2026-NAM-023,Namdapha Eastern Himalayan Wilderness,Bungarus caeruleus,Common Krait,Reptilia,LC,False,30456,0.13072,99.04,COI (Invertebrate),VERIFIED_EXPERT
+76,EDNA-2025-SND-038,Sundarbans Mangrove Biosphere,Manis crassicaudata,Indian Pangolin,Mammalia,EN,False,44497,0.23454,97.83,12S rRNA (Vertebrate),VERIFIED_AI
+77,EDNA-2026-GIR-008,Gir Asiatic Lion Sanctuary,Strix aluco,Tawny Owl,Aves,LC,False,24914,0.11716,99.23,18S rRNA (Eukaryote),VERIFIED_AI
+78,EDNA-2026-KZR-039,Kaziranga Floodplain Sanctuary,Axis axis,Chital / Spotted Deer,Mammalia,LC,False,38120,0.09974,98.46,16S rRNA (Fish/Amphibian),VERIFIED_EXPERT
+79,EDNA-2026-MNS-035,Manas Transboundary River Reserve,Ardea insignis,White-Bellied Heron,Aves,CR,False,36816,0.04337,97.92,COI (Invertebrate),VERIFIED_AI
+80,EDNA-2026-GIR-021,Gir Asiatic Lion Sanctuary,Avicennia marina,Grey Mangrove,Plantae,LC,False,41043,0.14579,97.63,COI (Invertebrate),VERIFIED_EXPERT
+81,EDNA-2026-MNS-032,Manas Transboundary River Reserve,Axis axis,Chital / Spotted Deer,Mammalia,LC,False,13237,0.01465,99.54,18S rRNA (Eukaryote),VERIFIED_EXPERT
+82,EDNA-2026-MNS-032,Manas Transboundary River Reserve,Dawkinsia denisonii,Denison Barb / Miss Kerala,Actinopterygii,EN,False,45322,0.05015,98.73,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+83,EDNA-2026-WGH-006,Western Ghats Rainforest Corridor,Panthera pardus,Leopard,Mammalia,VU,False,14902,0.01982,98.23,COI (Invertebrate),VERIFIED_AI
+84,EDNA-2025-MNS-019,Manas Transboundary River Reserve,Gyps bengalensis,White-Rumped Vulture,Aves,CR,False,30421,0.06965,98.91,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+85,EDNA-2026-GIR-008,Gir Asiatic Lion Sanctuary,Moschus chrysogaster,Alpine Musk Deer,Mammalia,EN,False,18006,0.08467,99.44,COI (Invertebrate),VERIFIED_EXPERT
+86,EDNA-2025-WGH-049,Western Ghats Rainforest Corridor,Ailurus fulgens,Red Panda,Mammalia,EN,False,47569,0.18008,98.6,16S rRNA (Fish/Amphibian),VERIFIED_EXPERT
+87,EDNA-2025-GIR-007,Gir Asiatic Lion Sanctuary,Eudynamys scolopaceus,Asian Koel,Aves,LC,False,19960,0.08894,99.69,12S rRNA (Vertebrate),VERIFIED_EXPERT
+88,EDNA-2026-NAM-023,Namdapha Eastern Himalayan Wilderness,Loris tardigradus,Slender Loris,Mammalia,EN,False,29224,0.12543,99.66,12S rRNA (Vertebrate),VERIFIED_EXPERT
+89,EDNA-2025-WGH-016,Western Ghats Rainforest Corridor,Alcedo atthis,Common Kingfisher,Aves,LC,False,38980,0.07181,99.22,18S rRNA (Eukaryote),VERIFIED_EXPERT
+90,EDNA-2026-KZR-011,Kaziranga Floodplain Sanctuary,Axis axis,Chital / Spotted Deer,Mammalia,LC,False,13991,0.04341,99.53,12S rRNA (Vertebrate),VERIFIED_EXPERT
+91,EDNA-2026-MNS-035,Manas Transboundary River Reserve,Crocodylus porosus,Saltwater Crocodile,Reptilia,LC,False,39565,0.04661,98.85,COI (Invertebrate),VERIFIED_EXPERT
+92,EDNA-2025-MNS-019,Manas Transboundary River Reserve,Ophiophagus hannah,King Cobra,Reptilia,VU,False,37984,0.08697,98.17,18S rRNA (Eukaryote),VERIFIED_EXPERT
+93,EDNA-2025-CBT-044,Jim Corbett Himalayan Foothills,Trachypithecus geei,Golden Langur,Mammalia,EN,False,9335,0.02124,99.91,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+94,EDNA-2025-WGH-018,Western Ghats Rainforest Corridor,Prionailurus viverrinus,Fishing Cat,Mammalia,VU,False,46418,0.20388,99.67,16S rRNA (Fish/Amphibian),VERIFIED_AI
+95,EDNA-2026-GIR-021,Gir Asiatic Lion Sanctuary,Eudynamys scolopaceus,Asian Koel,Aves,LC,False,44767,0.15902,98.48,16S rRNA (Fish/Amphibian),VERIFIED_EXPERT
+96,EDNA-2025-WGH-018,Western Ghats Rainforest Corridor,Oreochromis niloticus,Nile Tilapia,Actinopterygii,LC,True,25037,0.10997,98.63,12S rRNA (Vertebrate),VERIFIED_EXPERT
+97,EDNA-2025-KZR-048,Kaziranga Floodplain Sanctuary,Crocodylus porosus,Saltwater Crocodile,Reptilia,LC,False,45978,0.09558,99.84,COI (Invertebrate),VERIFIED_EXPERT
+98,EDNA-2026-MNS-032,Manas Transboundary River Reserve,Rhacophorus malabaricus,Malabar Gliding Frog,Amphibia,LC,False,38589,0.0427,97.51,12S rRNA (Vertebrate),VERIFIED_EXPERT
+99,EDNA-2025-KZR-030,Kaziranga Floodplain Sanctuary,Bungarus caeruleus,Common Krait,Reptilia,LC,False,4600,0.005,99.49,ITS2 (Fungal/Flora),VERIFIED_AI
+100,EDNA-2026-NAM-028,Namdapha Eastern Himalayan Wilderness,Pitta brachyura,Indian Pitta,Aves,LC,False,32871,0.0717,98.17,COI (Invertebrate),VERIFIED_AI
+101,EDNA-2026-NAM-037,Namdapha Eastern Himalayan Wilderness,Prionailurus viverrinus,Fishing Cat,Mammalia,VU,False,37552,0.05067,99.63,COI (Invertebrate),VERIFIED_EXPERT
+102,EDNA-2025-WGH-049,Western Ghats Rainforest Corridor,Neofelis nebulosa,Clouded Leopard,Mammalia,VU,False,3460,0.0131,97.75,ITS2 (Fungal/Flora),VERIFIED_AI
+103,EDNA-2026-PER-055,Periyar Cardamom Hills Watershed,Buceros bicornis,Great Hornbill,Aves,VU,False,29370,0.03186,98.64,ITS2 (Fungal/Flora),VERIFIED_AI
+104,EDNA-2026-KZR-045,Kaziranga Floodplain Sanctuary,Prionailurus viverrinus,Fishing Cat,Mammalia,VU,False,43048,0.05515,98.25,COI (Invertebrate),VERIFIED_AI
+105,EDNA-2026-NAM-024,Namdapha Eastern Himalayan Wilderness,Corvus splendens,House Crow,Aves,LC,False,5851,0.01038,98.43,16S rRNA (Fish/Amphibian),VERIFIED_AI
+106,EDNA-2026-PER-041,Periyar Cardamom Hills Watershed,Python bivittatus,Burmese Python,Reptilia,VU,False,46288,0.10208,99.39,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+107,EDNA-2025-WGH-046,Western Ghats Rainforest Corridor,Trachypithecus geei,Golden Langur,Mammalia,EN,False,521,0.00219,98.03,12S rRNA (Vertebrate),VERIFIED_AI
+108,EDNA-2026-NAM-015,Namdapha Eastern Himalayan Wilderness,Eichhornia crassipes,Water Hyacinth,Plantae,LC,True,1058,0.00336,97.52,COI (Invertebrate),VERIFIED_EXPERT
+109,EDNA-2026-NAM-028,Namdapha Eastern Himalayan Wilderness,Prionailurus viverrinus,Fishing Cat,Mammalia,VU,False,31756,0.06927,97.68,ITS2 (Fungal/Flora),VERIFIED_AI
+110,EDNA-2026-SND-052,Sundarbans Mangrove Biosphere,Bubalus arnee,Wild Water Buffalo,Mammalia,EN,False,7213,0.01127,98.28,COI (Invertebrate),VERIFIED_AI
+111,EDNA-2026-WGH-050,Western Ghats Rainforest Corridor,Axis axis,Chital / Spotted Deer,Mammalia,LC,False,42496,0.06386,99.98,16S rRNA (Fish/Amphibian),VERIFIED_AI
+112,EDNA-2026-NAM-037,Namdapha Eastern Himalayan Wilderness,Elephas maximus,Asian Elephant,Mammalia,EN,False,40447,0.05457,99.13,ITS2 (Fungal/Flora),VERIFIED_AI
+113,EDNA-2025-NAM-014,Namdapha Eastern Himalayan Wilderness,Macaca radiata,Bonnet Macaque,Mammalia,LC,False,27431,0.04591,99.04,ITS2 (Fungal/Flora),VERIFIED_EXPERT
+114,EDNA-2026-WGH-006,Western Ghats Rainforest Corridor,Trachypithecus geei,Golden Langur,Mammalia,EN,False,9625,0.0128,99.38,18S rRNA (Eukaryote),VERIFIED_EXPERT
+115,EDNA-2026-NAM-023,Namdapha Eastern Himalayan Wilderness,Hypophthalmichthys nobilis,Bighead Carp,Actinopterygii,LC,True,21061,0.09039,99.48,16S rRNA (Fish/Amphibian),VERIFIED_AI
+116,EDNA-2026-WGH-006,Western Ghats Rainforest Corridor,Eudynamys scolopaceus,Asian Koel,Aves,LC,False,36717,0.04883,99.0,18S rRNA (Eukaryote),VERIFIED_AI
+117,EDNA-2026-KZR-045,Kaziranga Floodplain Sanctuary,Panthera pardus,Leopard,Mammalia,VU,False,43599,0.05586,99.69,16S rRNA (Fish/Amphibian),VERIFIED_EXPERT
+118,EDNA-2026-NAM-033,Namdapha Eastern Himalayan Wilderness,Pavo cristatus,Indian Peafowl,Aves,LC,False,26123,0.044,98.24,12S rRNA (Vertebrate),VERIFIED_EXPERT
+119,EDNA-2026-PER-051,Periyar Cardamom Hills Watershed,Ciconia boyciana,Oriental Stork,Aves,EN,False,32882,0.0377,98.46,16S rRNA (Fish/Amphibian),VERIFIED_EXPERT
+120,EDNA-2026-KZR-039,Kaziranga Floodplain Sanctuary,Melursus ursinus,Sloth Bear,Mammalia,VU,False,35071,0.09177,99.72,12S rRNA (Vertebrate),VERIFIED_EXPERT
+121,EDNA-2026-GIR-021,Gir Asiatic Lion Sanctuary,Prionailurus viverrinus,Fishing Cat,Mammalia,VU,False,25801,0.09165,99.65,18S rRNA (Eukaryote),VERIFIED_EXPERT
+122,EDNA-2026-MNS-035,Manas Transboundary River Reserve,Ardea insignis,White-Bellied Heron,Aves,CR,False,31318,0.03689,99.89,12S rRNA (Vertebrate),VERIFIED_AI
+123,EDNA-2026-CBT-005,Jim Corbett Himalayan Foothills,Elephas maximus,Asian Elephant,Mammalia,EN,False,17632,0.03012,98.04,12S rRNA (Vertebrate),VERIFIED_EXPERT
+124,EDNA-2026-PER-026,Periyar Cardamom Hills Watershed,Anopheles stephensi,Malaria Vector Mosquito,Insecta,LC,False,19225,0.08707,99.07,18S rRNA (Eukaryote),VERIFIED_EXPERT
+125,EDNA-2026-NAM-028,Namdapha Eastern Himalayan Wilderness,Horabagrus brachysoma,Sun Catfish,Actinopterygii,VU,False,5851,0.01276,99.1,18S rRNA (Eukaryote),VERIFIED_EXPERT
+126,EDNA-2025-WGH-018,Western Ghats Rainforest Corridor,Manis crassicaudata,Indian Pangolin,Mammalia,EN,False,20760,0.09118,97.7,16S rRNA (Fish/Amphibian),VERIFIED_EXPERT
+127,EDNA-2025-NAM-010,Namdapha Eastern Himalayan Wilderness,Rhacophorus malabaricus,Malabar Gliding Frog,Amphibia,LC,False,26056,0.03604,98.97,12S rRNA (Vertebrate),VERIFIED_AI
+128,EDNA-2026-NAM-028,Namdapha Eastern Himalayan Wilderness,Ciconia boyciana,Oriental Stork,Aves,EN,False,4244,0.00926,98.11,ITS2 (Fungal/Flora),VERIFIED_AI
+129,EDNA-2026-KZR-040,Kaziranga Floodplain Sanctuary,Cuon alpinus,Dhole / Asiatic Wild Dog,Mammalia,EN,False,20719,0.05692,99.17,16S rRNA (Fish/Amphibian),VERIFIED_AI
+130,EDNA-2025-WGH-046,Western Ghats Rainforest Corridor,Axis axis,Chital / Spotted Deer,Mammalia,LC,False,46423,0.19478,97.53,ITS2 (Fungal/Flora),VERIFIED_EXPERT

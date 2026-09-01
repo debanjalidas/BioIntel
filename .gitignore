@@ -46,8 +46,8 @@ frontend/.turbo/
 .DS_Store
 Thumbs.db
 
-# Data & Large Media (keep directory structure via .gitkeep)
-data/audio/*
-!data/audio/.gitkeep
-data/satellite/*
-!data/satellite/.gitkeep
+# Data & Large Media (track structured datasets and scripts)
+data/audio/*.raw
+data/audio/*.flac
+data/satellite/*.tif
+data/satellite/*.tiff

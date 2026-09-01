@@ -1,0 +1,325 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": 1,
+        "name": "Sundarbans Mangrove Biosphere",
+        "site_code": "SITE-SND-001",
+        "ecosystem_type": "Mangrove / Coastal Wetland",
+        "area_sq_km": 4260.0,
+        "elevation_m": 7.5,
+        "country": "India / Bangladesh",
+        "alert_level": "WARNING"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              88.4,
+              21.6
+            ],
+            [
+              89.2,
+              21.6
+            ],
+            [
+              89.2,
+              22.3
+            ],
+            [
+              88.4,
+              22.3
+            ],
+            [
+              88.4,
+              21.6
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": 2,
+        "name": "Kaziranga Floodplain Sanctuary",
+        "site_code": "SITE-KZR-002",
+        "ecosystem_type": "Riparian Alluvial Grassland",
+        "area_sq_km": 858.0,
+        "elevation_m": 65.0,
+        "country": "India",
+        "alert_level": "NORMAL"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              92.95,
+              26.5
+            ],
+            [
+              93.45,
+              26.5
+            ],
+            [
+              93.45,
+              26.78
+            ],
+            [
+              92.95,
+              26.78
+            ],
+            [
+              92.95,
+              26.5
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": 3,
+        "name": "Western Ghats Rainforest Corridor",
+        "site_code": "SITE-WGH-003",
+        "ecosystem_type": "Tropical Montane Cloud Forest",
+        "area_sq_km": 1600.0,
+        "elevation_m": 950.0,
+        "country": "India",
+        "alert_level": "CRITICAL"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.3,
+              10.2
+            ],
+            [
+              77.1,
+              10.2
+            ],
+            [
+              77.1,
+              11.1
+            ],
+            [
+              76.3,
+              11.1
+            ],
+            [
+              76.3,
+              10.2
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": 4,
+        "name": "Jim Corbett Himalayan Foothills",
+        "site_code": "SITE-CBT-004",
+        "ecosystem_type": "Moist Deciduous Sal Forest",
+        "area_sq_km": 1288.0,
+        "elevation_m": 420.0,
+        "country": "India",
+        "alert_level": "NORMAL"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              78.7,
+              29.3
+            ],
+            [
+              79.2,
+              29.3
+            ],
+            [
+              79.2,
+              29.75
+            ],
+            [
+              78.7,
+              29.75
+            ],
+            [
+              78.7,
+              29.3
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": 5,
+        "name": "Manas Transboundary River Reserve",
+        "site_code": "SITE-MNS-005",
+        "ecosystem_type": "Sub-Himalayan Bhabar Terai",
+        "area_sq_km": 950.0,
+        "elevation_m": 115.0,
+        "country": "India / Bhutan",
+        "alert_level": "NORMAL"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              90.8,
+              26.6
+            ],
+            [
+              91.3,
+              26.6
+            ],
+            [
+              91.3,
+              26.95
+            ],
+            [
+              90.8,
+              26.95
+            ],
+            [
+              90.8,
+              26.6
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": 6,
+        "name": "Gir Asiatic Lion Sanctuary",
+        "site_code": "SITE-GIR-006",
+        "ecosystem_type": "Dry Deciduous Teak & Scrub",
+        "area_sq_km": 1412.0,
+        "elevation_m": 280.0,
+        "country": "India",
+        "alert_level": "WARNING"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              70.5,
+              20.9
+            ],
+            [
+              71.15,
+              20.9
+            ],
+            [
+              71.15,
+              21.35
+            ],
+            [
+              70.5,
+              21.35
+            ],
+            [
+              70.5,
+              20.9
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": 7,
+        "name": "Periyar Cardamom Hills Watershed",
+        "site_code": "SITE-PER-007",
+        "ecosystem_type": "Evergreen Rainforest & Reservoir",
+        "area_sq_km": 925.0,
+        "elevation_m": 1200.0,
+        "country": "India",
+        "alert_level": "NORMAL"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              76.9,
+              9.25
+            ],
+            [
+              77.35,
+              9.25
+            ],
+            [
+              77.35,
+              9.65
+            ],
+            [
+              76.9,
+              9.65
+            ],
+            [
+              76.9,
+              9.25
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": 8,
+        "name": "Namdapha Eastern Himalayan Wilderness",
+        "site_code": "SITE-NAM-008",
+        "ecosystem_type": "Subtropical Broadleaf & Alpine",
+        "area_sq_km": 1985.0,
+        "elevation_m": 2200.0,
+        "country": "India",
+        "alert_level": "NORMAL"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              96.15,
+              27.3
+            ],
+            [
+              96.65,
+              27.3
+            ],
+            [
+              96.65,
+              27.7
+            ],
+            [
+              96.15,
+              27.7
+            ],
+            [
+              96.15,
+              27.3
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
