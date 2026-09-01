@@ -36,8 +36,67 @@ import {
   RefreshCw,
   Sparkles,
   Volume2,
+  CameraOff,
 } from 'lucide-react';
 import { bioApi } from './services/api';
+
+function SpeciesCatalogCard({ item }) {
+  const [imgError, setImgError] = useState(false);
+  const hasImage = Boolean(item.image_url) && !imgError;
+
+  return (
+    <div
+      key={item.id}
+      className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+    >
+      <div>
+        <div className="h-40 w-full overflow-hidden rounded-xl mb-3 bg-slate-100 relative flex items-center justify-center">
+          {hasImage ? (
+            <img
+              src={item.image_url}
+              alt={item.common_name}
+              className="h-full w-full object-cover rounded-xl transition-transform duration-300 hover:scale-105"
+              loading="lazy"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded-xl p-3 text-slate-400 select-none">
+              <CameraOff className="h-7 w-7 mb-1.5 text-slate-300" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                No Photo Available
+              </span>
+              <span className="text-[9px] text-slate-300 mt-0.5 font-mono">
+                {item.taxonomic_group}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center justify-between mb-1">
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono ${
+            item.conservation_status === 'CR' ? 'bg-rose-100 text-rose-700' :
+            item.conservation_status === 'EN' ? 'bg-orange-100 text-orange-700' :
+            item.conservation_status === 'VU' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
+          }`}>
+            IUCN: {item.conservation_status}
+          </span>
+          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+            {item.taxonomic_group}
+          </span>
+        </div>
+        <h3 className="font-bold text-slate-900 text-sm leading-tight mt-1.5">{item.common_name}</h3>
+        <p className="text-xs text-slate-400 italic font-mono mb-2">{item.scientific_name}</p>
+        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>
+      </div>
+
+      <div className="flex items-center justify-between text-xs pt-3 mt-3 border-t border-slate-100">
+        <span className="text-[10px] font-semibold text-slate-500">
+          {item.is_indicator_species ? 'Bio-Indicator' : (item.is_invasive ? 'Invasive Flag' : 'Native')}
+        </span>
+        <span className="font-mono text-[11px] font-bold text-slate-700">ID #{item.id}</span>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -231,61 +290,9 @@ export default function App() {
 
               {/* Grid of Species Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {speciesList.map((item) => {
-                  const fallbackMap = {
-                    Mammalia: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=600&q=80',
-                    Aves: 'https://images.unsplash.com/photo-1549608276-5786777e6587?auto=format&fit=crop&w=600&q=80',
-                    Reptilia: 'https://images.unsplash.com/photo-1527525443983-6e60c75fff46?auto=format&fit=crop&w=600&q=80',
-                    Amphibia: 'https://images.unsplash.com/photo-1508817628294-5a453fa0b8fb?auto=format&fit=crop&w=600&q=80',
-                    Actinopterygii: 'https://images.unsplash.com/photo-1524704654690-b56c05c78a00?auto=format&fit=crop&w=600&q=80',
-                    Plantae: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
-                    Insecta: 'https://images.unsplash.com/photo-1551893478-d726eaf0442c?auto=format&fit=crop&w=600&q=80',
-                  };
-                  const fallbackImg = fallbackMap[item.taxonomic_group] || 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80';
-
-                  return (
-                    <div
-                      key={item.id}
-                      className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="h-40 w-full overflow-hidden rounded-xl mb-3 bg-slate-100 relative">
-                          <img
-                            src={item.image_url || fallbackImg}
-                            alt={item.common_name}
-                            className="h-full w-full object-cover rounded-xl transition-transform duration-300 hover:scale-105"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = fallbackImg;
-                            }}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono ${
-                            item.conservation_status === 'CR' ? 'bg-rose-100 text-rose-700' :
-                            item.conservation_status === 'EN' ? 'bg-orange-100 text-orange-700' :
-                            item.conservation_status === 'VU' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
-                          }`}>
-                            IUCN: {item.conservation_status}
-                          </span>
-                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                            {item.taxonomic_group}
-                          </span>
-                        </div>
-                        <h3 className="font-bold text-slate-900 text-sm leading-tight mt-1.5">{item.common_name}</h3>
-                        <p className="text-xs text-slate-400 italic font-mono mb-2">{item.scientific_name}</p>
-                        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs pt-3 mt-3 border-t border-slate-100">
-                        <span className="text-[10px] font-semibold text-slate-500">
-                          {item.is_indicator_species ? 'Bio-Indicator' : (item.is_invasive ? 'Invasive Flag' : 'Native')}
-                        </span>
-                        <span className="font-mono text-[11px] font-bold text-slate-700">ID #{item.id}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                {speciesList.map((item) => (
+                  <SpeciesCatalogCard key={item.id} item={item} />
+                ))}
               </div>
             </div>
           )}
