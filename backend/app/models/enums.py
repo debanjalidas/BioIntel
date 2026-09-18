@@ -4,12 +4,14 @@ import enum
 class UserRole(str, enum.Enum):
     ADMIN = "ADMIN"
     RESEARCHER = "RESEARCHER"
+    OBSERVER = "OBSERVER"
     FIELD_AGENT = "FIELD_AGENT"
     VIEWER = "VIEWER"
 
 
 class VerificationStatus(str, enum.Enum):
     UNVERIFIED = "UNVERIFIED"
+    VERIFIED = "VERIFIED"
     VERIFIED_AI = "VERIFIED_AI"
     VERIFIED_EXPERT = "VERIFIED_EXPERT"
     REJECTED = "REJECTED"
@@ -34,6 +36,13 @@ class ConservationStatus(str, enum.Enum):
     EX = "EX"  # Extinct
     DD = "DD"  # Data Deficient
     NE = "NE"  # Not Evaluated
+
+
+class NativeStatus(str, enum.Enum):
+    NATIVE = "NATIVE"
+    INTRODUCED = "INTRODUCED"
+    INVASIVE = "INVASIVE"
+    POTENTIAL_INVASIVE = "POTENTIAL_INVASIVE"
 
 
 class AlertSeverity(str, enum.Enum):

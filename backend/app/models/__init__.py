@@ -5,6 +5,7 @@ from app.models.enums import (
     VerificationStatus,
     ObservationSource,
     ConservationStatus,
+    NativeStatus,
     AlertSeverity,
     AlertStatus,
     RiskLevel,
@@ -14,6 +15,11 @@ from app.models.user import User
 from app.models.spatial import Zone, MonitoringSite
 from app.models.species import Species
 from app.models.observation import Observation
+from app.models.environmental_data import EnvironmentalData
+from app.models.biodiversity_metric import BiodiversityMetric
+from app.models.risk_alert import RiskAlert
+from app.models.ai_insight import AIInsight
+from app.models.knowledge_document import KnowledgeDocument
 from app.models.acoustic import AcousticRecording, AcousticDetection
 from app.models.edna import EdnaSample, EdnaDetection
 from app.models.analytics import (
@@ -29,6 +35,7 @@ __all__ = [
     "VerificationStatus",
     "ObservationSource",
     "ConservationStatus",
+    "NativeStatus",
     "AlertSeverity",
     "AlertStatus",
     "RiskLevel",
@@ -39,6 +46,11 @@ __all__ = [
     "MonitoringSite",
     "Species",
     "Observation",
+    "EnvironmentalData",
+    "BiodiversityMetric",
+    "RiskAlert",
+    "AIInsight",
+    "KnowledgeDocument",
     "AcousticRecording",
     "AcousticDetection",
     "EdnaSample",

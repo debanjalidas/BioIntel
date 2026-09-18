@@ -2,7 +2,7 @@ from typing import List, Optional, TYPE_CHECKING
 from sqlalchemy import String, Text, Boolean, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base, TimestampMixin
-from app.models.enums import ConservationStatus
+from app.models.enums import ConservationStatus, NativeStatus
 
 if TYPE_CHECKING:
     from app.models.observation import Observation
@@ -20,10 +20,17 @@ class Species(Base, TimestampMixin):
     )
     common_name: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
     taxonomic_group: Mapped[str] = mapped_column(
-        String(100), index=True, nullable=False
+        String(100), index=True, nullable=False, default="Aves"
     )  # e.g. Mammalia, Aves, Reptilia, Amphibia, Plantae, Insecta
+    category: Mapped[str] = mapped_column(
+        String(100), index=True, nullable=False, default="birds"
+    )  # birds, mammals, insects, plants, reptiles, amphibians, butterflies, other
     family: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     genus: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    habitat: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    native_status: Mapped[str] = mapped_column(
+        String(50), default="native", index=True, nullable=False
+    )  # native, introduced, invasive, potential_invasive
     conservation_status: Mapped[ConservationStatus] = mapped_column(
         SQLEnum(ConservationStatus, name="conservation_status_enum"),
         default=ConservationStatus.LC,
@@ -39,6 +46,13 @@ class Species(Base, TimestampMixin):
     )
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     image_url: Mapped[Optional[str]] = mapped_column(String(1024), nullable=True)
+    source: Mapped[Optional[str]] = mapped_column(
+        String(255), default="Campus Ecological Survey & IUCN Red List", nullable=True
+    )
+
+    @property
+    def image(self) -> Optional[str]:
+        return self.image_url
 
     # Relationships
     observations: Mapped[List["Observation"]] = relationship(
@@ -55,4 +69,4 @@ class Species(Base, TimestampMixin):
     )
 
     def __repr__(self) -> str:
-        return f"<Species id={self.id} scientific_name='{self.scientific_name}' status='{self.conservation_status.value}'>"
+        return f"<Species id={self.id} common='{self.common_name}' scientific='{self.scientific_name}'>"

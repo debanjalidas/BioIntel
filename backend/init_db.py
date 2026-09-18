@@ -1,5 +1,5 @@
 """Database initialization script.
-Enables PostGIS extension and creates all database tables.
+Enables PostGIS extension (on PostgreSQL) and creates all database tables.
 """
 
 import os
@@ -25,12 +25,17 @@ def init_database() -> None:
     db_target = settings.SQLALCHEMY_DATABASE_URI.split("@")[-1] if "@" in settings.SQLALCHEMY_DATABASE_URI else "local"
     logger.info("Connecting to database: %s", db_target)
     
-    with engine.connect() as conn:
-        # Enable PostGIS spatial extension
-        logger.info("Ensuring PostGIS spatial extension is enabled...")
-        conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
-        conn.commit()
-        logger.info("PostGIS extension check complete.")
+    if engine.dialect.name == "postgresql":
+        with engine.connect() as conn:
+            logger.info("Ensuring PostGIS spatial extension is enabled on PostgreSQL...")
+            try:
+                conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis;"))
+                conn.commit()
+                logger.info("PostGIS extension check complete.")
+            except Exception as e:
+                logger.warning("Could not enable PostGIS extension (may require superuser): %s", e)
+    else:
+        logger.info("Using SQLite dialect with native GeoJSON compatibility layer.")
 
     logger.info("Creating all database tables...")
     Base.metadata.create_all(bind=engine)

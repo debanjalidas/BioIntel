@@ -1,17 +1,25 @@
 from datetime import datetime, timezone
 from typing import Generator
 from sqlalchemy import create_engine, DateTime, func
-from sqlalchemy.orm import declarative_base, sessionmaker, scoped_session, Mapped, mapped_column
+from sqlalchemy.orm import declarative_base, sessionmaker, Mapped, mapped_column
 from app.core.config import settings
 
-# Engine configuration with connection recycling and health check
-engine = create_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-    echo=False,
-)
+db_uri = settings.SQLALCHEMY_DATABASE_URI
+
+if db_uri.startswith("sqlite"):
+    engine = create_engine(
+        db_uri,
+        connect_args={"check_same_thread": False},
+        echo=False,
+    )
+else:
+    engine = create_engine(
+        db_uri,
+        pool_pre_ping=True,
+        pool_size=10,
+        max_overflow=20,
+        echo=False,
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

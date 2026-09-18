@@ -10,7 +10,10 @@ import os
 import json
 import logging
 from typing import Dict, Any, List
-import joblib
+try:
+    import joblib
+except ImportError:
+    joblib = None
 import numpy as np
 
 logger = logging.getLogger(__name__)

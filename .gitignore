@@ -25,6 +25,9 @@ wheels/
 .pytest_cache/
 .coverage
 htmlcov/
+*.db
+*.sqlite
+*.sqlite3
 
 # Node / Frontend
 frontend/node_modules/

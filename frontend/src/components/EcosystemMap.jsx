@@ -3,477 +3,457 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import {
   Layers,
-  ListFilter,
   Maximize2,
   Minimize2,
-  MoreHorizontal,
-  ChevronDown,
-  Volume2,
-  Dna,
-  Camera,
   TreePine,
-  ShieldAlert,
+  Shield,
+  Lock,
+  Unlock,
+  Eye,
+  Filter,
+  RefreshCw,
   MapPin,
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
 } from 'lucide-react';
+import { bioApi } from '../services/api';
 
-// Real forest coordinates: Kaziranga Tiger Reserve & Nilgiri Biosphere Forest
-const FOREST_CENTER = [26.585, 93.175];
+// Campus Center coordinates
+const CAMPUS_CENTER = [28.5460, 77.1930];
+
+// Category color mappings
+const CATEGORY_COLORS = {
+  birds: { bg: '#0284c7', border: '#38bdf8', glyph: '🦅', name: 'Birds' },
+  butterflies: { bg: '#d97706', border: '#fcd34d', glyph: '🦋', name: 'Butterflies' },
+  plants: { bg: '#15803d', border: '#86efac', glyph: '🌿', name: 'Plants' },
+  insects: { bg: '#7c3aed', border: '#c4b5fd', glyph: '🐝', name: 'Insects' },
+  reptiles: { bg: '#c2410c', border: '#fdba74', glyph: '🦎', name: 'Reptiles' },
+  mammals: { bg: '#475569', border: '#cbd5e1', glyph: '🐾', name: 'Mammals' },
+  other: { bg: '#10b981', border: '#6ee7b7', glyph: '🌱', name: 'Other' },
+};
 
 export default function EcosystemMap({ onSelectSite }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
-  const polygonLayerRef = useRef(null);
+  const markersGroupRef = useRef(null);
+  const zonesGroupRef = useRef(null);
   const tileLayerRef = useRef(null);
 
-  const [activeLayer, setActiveLayer] = useState('Satellite Forest');
-  const [showLegend, setShowLegend] = useState(true);
+  const [activeLayer, setActiveLayer] = useState('Satellite');
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedPoint, setSelectedPoint] = useState(null);
+  const [selectedZone, setSelectedZone] = useState(null);
+  const [pointsData, setPointsData] = useState([]);
+  const [zonesData, setZonesData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [selectedSite, setSelectedSite] = useState(null);
 
-  // Available real forest tile sources
   const tileProviders = {
-    'Satellite Forest': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    'Topographic Forest': 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-    'OpenTopoMap': 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    'CartoDB Voyager': 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    Satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    Topographic: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+    Streets: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
   };
 
-  // Real Monitoring Sites with GPS coordinates
-  const sites = [
-    {
-      id: 1,
-      name: 'Western Core Sanctuary (Beta-1)',
-      type: 'Bioacoustic PAM & Camera Trap',
-      species: 'Asian Elephant, Green Bee-eater',
-      status: 'Optimal Health',
-      severity: 'optimal',
-      lat: 26.592,
-      lng: 93.148,
-      glyph: '🌿',
-      haloColor: 'rgba(16, 185, 129, 0.35)',
-      coreColor: '#10b981',
-      details: 'Acoustic activity 98% normal. 42 distinct avian species registered in the last 24h.',
-    },
-    {
-      id: 2,
-      name: 'South-West Buffer Outpost',
-      type: 'Acoustic Activity Grid',
-      species: 'Acoustic Frequency Decline',
-      status: 'Moderate Threat',
-      severity: 'moderate',
-      lat: 26.568,
-      lng: 93.152,
-      glyph: '⚠️',
-      haloColor: 'rgba(245, 158, 11, 0.35)',
-      coreColor: '#f59e0b',
-      details: 'Warning: 22% dip in twilight chorus calling. IoT humidity sensor recalibrated.',
-    },
-    {
-      id: 3,
-      name: 'Western Threat Sector (High Risk Perimeter)',
-      type: 'Satellite Sentinel-2 & Ground Patrol',
-      species: 'Deforestation & Canopy Loss',
-      status: 'Critical Alert Zone',
-      severity: 'critical',
-      lat: 26.582,
-      lng: 93.171,
-      glyph: '⚠️',
-      haloColor: 'rgba(239, 68, 68, 0.45)',
-      coreColor: '#ef4444',
-      details: 'Critical: Sudden NDVI drop (-14%) detected by Sentinel-2 band 8 analysis. Ranger unit dispatched.',
-    },
-    {
-      id: 4,
-      name: 'North River Patrol Station',
-      type: 'Camera Trap Array (AI Nightvision)',
-      species: 'Bengal Tiger (Panthera tigris)',
-      status: 'Moderate Threat',
-      severity: 'moderate',
-      lat: 26.605,
-      lng: 93.185,
-      glyph: '📷',
-      haloColor: 'rgba(245, 158, 11, 0.35)',
-      coreColor: '#f59e0b',
-      details: 'Adult female tiger with 2 cubs logged via YOLOv8 inference at 03:14 AM.',
-    },
-    {
-      id: 5,
-      name: 'Central Habitat Watchtower',
-      type: 'IoT Canopy Micro-Climate Node',
-      species: 'Canopy Density 78%',
-      status: 'Moderate Threat',
-      severity: 'moderate',
-      lat: 26.586,
-      lng: 93.182,
-      glyph: '🌲',
-      haloColor: 'rgba(245, 158, 11, 0.35)',
-      coreColor: '#f59e0b',
-      details: 'Microclimate metrics: Temperature 24.2°C, Humidity 82%, Solar radiation 4.2 kWh/m².',
-    },
-    {
-      id: 6,
-      name: 'Core Sanctuary Riverbed Station',
-      type: 'Riparian Ecosystem Hydrophone',
-      species: 'Smooth-coated Otter, Native Flora',
-      status: 'Optimal Health',
-      severity: 'optimal',
-      lat: 26.574,
-      lng: 93.178,
-      glyph: '🌿',
-      haloColor: 'rgba(16, 185, 129, 0.35)',
-      coreColor: '#10b981',
-      details: 'River flow velocity optimal. Dissolved oxygen 7.8 mg/L.',
-    },
-    {
-      id: 7,
-      name: 'Brahmaputra Basin eDNA Station',
-      type: 'Automated Filtration Robot',
-      species: 'Golden Mahseer (Tor putitora)',
-      status: 'Optimal Health',
-      severity: 'optimal',
-      lat: 26.602,
-      lng: 93.205,
-      glyph: '🧬',
-      haloColor: 'rgba(16, 185, 129, 0.35)',
-      coreColor: '#10b981',
-      details: 'Illumina 12S amplicon sequencing verified 99.8% match for endangered Tor putitora.',
-    },
-    {
-      id: 8,
-      name: 'Eastern Marshland Laboratory',
-      type: 'eDNA Metabarcoding Array',
-      species: 'Microbiome & Wetland Census',
-      status: 'Moderate Threat',
-      severity: 'moderate',
-      lat: 26.581,
-      lng: 93.198,
-      glyph: '🔬',
-      haloColor: 'rgba(245, 158, 11, 0.35)',
-      coreColor: '#f59e0b',
-      details: 'Seasonal algal bloom risk under evaluation. Nitrate levels within safe limits.',
-    },
-    {
-      id: 9,
-      name: 'Eastern PAM Bioacoustic Grid',
-      type: 'Bioacoustic Directional Array',
-      species: 'Great Hornbill, Common Mormon',
-      status: 'Optimal Health',
-      severity: 'optimal',
-      lat: 26.589,
-      lng: 93.218,
-      glyph: '🎙️',
-      haloColor: 'rgba(16, 185, 129, 0.35)',
-      coreColor: '#10b981',
-      details: 'BirdNET AI recognized 36 distinct vocalization calls in the canopy canopy layer.',
-    },
-  ];
+  useEffect(() => {
+    fetchMapData();
+  }, [isAuthorized, selectedCategory]);
 
-  // High Risk Zone Polygon Coordinates in the forest
-  const highRiskPolygon = [
-    [26.589, 93.162],
-    [26.593, 93.184],
-    [26.584, 93.192],
-    [26.576, 93.188],
-    [26.572, 93.169],
-  ];
+  const fetchMapData = async () => {
+    setIsLoading(true);
+    try {
+      const res = await bioApi.getMapObservations({
+        is_authorized: isAuthorized,
+        category: selectedCategory === 'all' ? undefined : selectedCategory,
+      });
+      setPointsData(res?.points || []);
+      setZonesData(res?.campus_zones || []);
+    } catch (err) {
+      console.warn('Failed to fetch map points:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Initialize and update real Leaflet map instance
+  // Initialize Map Instance once
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
-      // Create Leaflet Map Instance
       const map = L.map(mapContainerRef.current, {
-        center: FOREST_CENTER,
-        zoom: 13,
-        zoomControl: false,
+        center: CAMPUS_CENTER,
+        zoom: 16,
+        zoomControl: true,
         attributionControl: false,
       });
 
-      // Add Base Tile Layer
-      const tileLayer = L.tileLayer(tileProviders[activeLayer], {
-        maxZoom: 18,
+      tileLayerRef.current = L.tileLayer(tileProviders[activeLayer], {
+        maxZoom: 19,
         subdomains: ['a', 'b', 'c'],
       }).addTo(map);
-      tileLayerRef.current = tileLayer;
 
-      // Add High-Risk Perimeter Polygon (Red Dashed + Mint Tint Fill)
-      const polygon = L.polygon(highRiskPolygon, {
-        color: '#ef4444',
-        weight: 2.5,
-        dashArray: '6, 6',
-        fillColor: '#10b981',
-        fillOpacity: 0.25,
-      }).addTo(map);
-      polygonLayerRef.current = polygon;
-
-      // Add Custom Glowing Halo Markers
-      sites.forEach((site) => {
-        const customIcon = L.divIcon({
-          className: 'custom-forest-marker',
-          html: `
-            <div style="
-              position: relative;
-              width: 36px;
-              height: 36px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              cursor: pointer;
-            ">
-              <!-- Outer Glowing Halo -->
-              <div style="
-                position: absolute;
-                inset: 0;
-                border-radius: 9999px;
-                background-color: ${site.haloColor};
-                box-shadow: 0 0 12px ${site.haloColor};
-                animation: ${site.severity === 'critical' ? 'pulse 1.5s infinite' : 'none'};
-              "></div>
-              <!-- Inner Solid Circle -->
-              <div style="
-                position: relative;
-                width: 24px;
-                height: 24px;
-                border-radius: 9999px;
-                background-color: ${site.coreColor};
-                color: #ffffff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 11px;
-                font-weight: bold;
-                border: 2px solid #ffffff;
-                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-              ">
-                ${site.glyph}
-              </div>
-            </div>
-          `,
-          iconSize: [36, 36],
-          iconAnchor: [18, 18],
-        });
-
-        const marker = L.marker([site.lat, site.lng], { icon: customIcon }).addTo(map);
-
-        // Click handler
-        marker.on('click', () => {
-          setSelectedSite(site);
-          if (onSelectSite) onSelectSite(site);
-        });
-
-        // Hover tooltip
-        marker.bindTooltip(
-          `<strong>${site.name}</strong><br/><span style="color:#10b981;font-size:10px">${site.type}</span>`,
-          { direction: 'top', offset: [0, -18], opacity: 0.95 }
-        );
-      });
-
+      zonesGroupRef.current = L.featureGroup().addTo(map);
+      markersGroupRef.current = L.featureGroup().addTo(map);
       mapInstanceRef.current = map;
-    } else {
-      // Update Tile Layer if changed
-      if (tileLayerRef.current) {
-        tileLayerRef.current.setUrl(tileProviders[activeLayer]);
-      }
+    }
+
+    return () => {
+      // Keep map alive
+    };
+  }, []);
+
+  // Update Base Tile Layer when activeLayer changes
+  useEffect(() => {
+    if (mapInstanceRef.current && tileLayerRef.current) {
+      mapInstanceRef.current.removeLayer(tileLayerRef.current);
+      tileLayerRef.current = L.tileLayer(tileProviders[activeLayer], {
+        maxZoom: 19,
+        subdomains: ['a', 'b', 'c'],
+      }).addTo(mapInstanceRef.current);
     }
   }, [activeLayer]);
 
-  // Handle Zoom In / Out Controls
-  const handleZoomIn = () => {
-    if (mapInstanceRef.current) mapInstanceRef.current.zoomIn();
-  };
+  // Render Campus Zones and Observation Markers
+  useEffect(() => {
+    if (!mapInstanceRef.current || !zonesGroupRef.current || !markersGroupRef.current) return;
 
-  const handleZoomOut = () => {
-    if (mapInstanceRef.current) mapInstanceRef.current.zoomOut();
-  };
+    // Clear old layers
+    zonesGroupRef.current.clearLayers();
+    markersGroupRef.current.clearLayers();
 
-  const handleRecenter = () => {
-    if (mapInstanceRef.current) mapInstanceRef.current.setView(FOREST_CENTER, 13);
-  };
+    // 1. Draw Campus Zones (semi-transparent circles with dashed rings)
+    zonesData.forEach((zone) => {
+      if (!zone.center) return;
+      const [lat, lng] = zone.center;
+      const zoneRadius = (zone.area_hectares || 2.5) * 45; // scale for visualization
+
+      const circle = L.circle([lat, lng], {
+        radius: zoneRadius,
+        color: zone.health_score > 80 ? '#10b981' : '#f59e0b',
+        weight: 2,
+        dashArray: '5, 5',
+        fillColor: zone.health_score > 80 ? '#10b981' : '#f59e0b',
+        fillOpacity: 0.18,
+      });
+
+      circle.on('click', () => {
+        setSelectedZone(zone);
+        setSelectedPoint(null);
+        if (onSelectSite) onSelectSite(zone);
+      });
+
+      // Add text label marker for zone
+      const labelIcon = L.divIcon({
+        className: 'zone-label-icon',
+        html: `
+          <div style="
+            background: rgba(15, 23, 42, 0.85);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 9999px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            text-align: center;
+          ">
+            ${zone.name} • ${Math.round(zone.health_score)}/100
+          </div>
+        `,
+        iconAnchor: [60, 10],
+      });
+
+      L.marker([lat, lng], { icon: labelIcon }).addTo(zonesGroupRef.current);
+      circle.addTo(zonesGroupRef.current);
+    });
+
+    // 2. Draw Observation Point Markers
+    pointsData.forEach((pt) => {
+      const catInfo = CATEGORY_COLORS[pt.category?.toLowerCase()] || CATEGORY_COLORS.other;
+      const isFuzzed = pt.is_location_obfuscated;
+
+      const markerHtml = `
+        <div style="
+          position: relative;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        ">
+          <!-- Outer Aura -->
+          <div style="
+            position: absolute;
+            inset: 0;
+            border-radius: 9999px;
+            background-color: ${catInfo.bg}33;
+            border: 2px solid ${isFuzzed ? '#e11d48' : catInfo.border};
+            ${isFuzzed ? 'border-style: dashed;' : ''}
+          "></div>
+          <!-- Inner Core -->
+          <div style="
+            position: relative;
+            width: 24px;
+            height: 24px;
+            border-radius: 9999px;
+            background-color: ${catInfo.bg};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+          ">
+            ${catInfo.glyph}
+          </div>
+          ${
+            isFuzzed
+              ? `<div style="
+                  position: absolute;
+                  top: -3px;
+                  right: -3px;
+                  width: 12px;
+                  height: 12px;
+                  background: #e11d48;
+                  border-radius: 9999px;
+                  border: 2px solid white;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 7px;
+                  color: white;
+                  font-weight: bold;
+                ">🔒</div>`
+              : ''
+          }
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        className: 'custom-obs-pin',
+        html: markerHtml,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
+
+      const marker = L.marker([pt.latitude, pt.longitude], { icon: customIcon });
+
+      marker.on('click', () => {
+        setSelectedPoint(pt);
+        setSelectedZone(null);
+      });
+
+      marker.addTo(markersGroupRef.current);
+    });
+  }, [pointsData, zonesData]);
 
   return (
-    <div
-      className={`bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden flex flex-col ${
-        isFullscreen ? 'fixed inset-4 z-50 shadow-2xl' : 'h-full min-h-[420px]'
-      }`}
-    >
-      {/* Top Map Header Bar */}
-      <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-white shrink-0 z-10">
-        <div className="flex items-center gap-3">
-          {/* Green Title Badge */}
-          <div className="bg-[#10b981] text-slate-950 font-black text-sm px-2.5 py-1 rounded-md tracking-tight">
-            Ecosystem Map
-          </div>
-
-          {/* Layer Selector Dropdown */}
-          <div className="relative group">
-            <button className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 text-xs font-bold transition-all shadow-xs">
-              <Layers className="h-3.5 w-3.5" />
-              <span>Layers</span>
-              <ChevronDown className="h-3 w-3" />
+    <div className="relative w-full h-full min-h-[500px] rounded-2xl overflow-hidden border border-slate-200 shadow-xs bg-slate-900 flex flex-col">
+      {/* Top Map Controls Overlay */}
+      <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+        {/* Left: Category Filter Pills */}
+        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-md pointer-events-auto overflow-x-auto max-w-full">
+          {['all', 'birds', 'butterflies', 'plants', 'insects', 'reptiles', 'mammals'].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3 py-1 rounded-xl text-xs font-semibold capitalize transition-all shrink-0 ${
+                selectedCategory === cat
+                  ? 'bg-emerald-600 text-white shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              {cat}
             </button>
-            <div className="hidden group-hover:block absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 text-xs font-medium">
-              {Object.keys(tileProviders).map((layerName) => (
-                <button
-                  key={layerName}
-                  onClick={() => setActiveLayer(layerName)}
-                  className={`w-full text-left px-3 py-1.5 transition-colors font-semibold flex items-center justify-between ${
-                    activeLayer === layerName
-                      ? 'bg-emerald-50 text-emerald-700 font-bold'
-                      : 'text-slate-700 hover:bg-slate-50'
-                  }`}
-                >
-                  <span>{layerName}</span>
-                  {activeLayer === layerName && <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded">Active</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline-block">
-            Kaziranga Biosphere Forest • 26.58° N, 93.17° E
-          </span>
+          ))}
         </div>
 
-        {/* Right Controls */}
-        <div className="flex items-center gap-2">
+        {/* Right: Sensitive Species Privacy Toggle & Layer Selector */}
+        <div className="flex items-center gap-2 pointer-events-auto">
+          {/* Privacy Toggle */}
           <button
-            onClick={() => setShowLegend(!showLegend)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
-              showLegend
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+            onClick={() => setIsAuthorized(!isAuthorized)}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-md transition-all backdrop-blur-md border ${
+              isAuthorized
+                ? 'bg-rose-600 text-white border-rose-500'
+                : 'bg-white/95 text-slate-700 border-slate-200 hover:bg-white'
             }`}
+            title="Toggle endangered species exact coordinates vs fuzzed public view"
           >
-            <ListFilter className="h-3.5 w-3.5" />
-            <span>Legend</span>
+            {isAuthorized ? <Unlock className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5 text-emerald-600" />}
+            <span>{isAuthorized ? 'Ecologist Mode' : 'Public Safe View'}</span>
           </button>
 
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 transition-colors shadow-2xs"
-            title="Toggle fullscreen"
-          >
-            {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-          </button>
+          {/* Tile layer selector */}
+          <div className="flex rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-md p-1">
+            {Object.keys(tileProviders).map((lyr) => (
+              <button
+                key={lyr}
+                onClick={() => setActiveLayer(lyr)}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all ${
+                  activeLayer === lyr
+                    ? 'bg-slate-900 text-white'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {lyr}
+              </button>
+            ))}
+          </div>
 
           <button
-            onClick={handleRecenter}
-            className="p-2 rounded-lg bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 transition-colors shadow-2xs"
-            title="Recenter Map"
+            onClick={fetchMapData}
+            className="p-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-md text-slate-600 hover:text-slate-900 transition-colors"
+            title="Refresh Map Points"
           >
-            <MoreHorizontal className="h-3.5 w-3.5" />
+            <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
-      {/* Real Interactive Leaflet Forest Map Container */}
-      <div className="relative flex-1 bg-slate-900 overflow-hidden min-h-[350px]">
-        <div ref={mapContainerRef} className="w-full h-full z-0" />
+      {/* Actual Leaflet Map Canvas */}
+      <div ref={mapContainerRef} className="w-full flex-1 z-0" />
 
-        {/* Floating Map Legend Card */}
-        {showLegend && (
-          <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md rounded-2xl p-4 border border-slate-200/90 shadow-lg text-xs font-medium space-y-2.5 z-10 w-52 animate-in fade-in duration-200">
-            <div className="font-extrabold text-slate-900 text-[11px] uppercase tracking-wider">
-              MAP LEGEND
-            </div>
+      {/* Selected Observation Modal Card (Bottom Left Overlay) */}
+      {selectedPoint && (
+        <div className="absolute bottom-4 left-4 z-[1000] max-w-sm w-full bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 p-4 shadow-xl text-xs animate-fadeIn space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-[10px] uppercase tracking-wider text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded">
+              {selectedPoint.category}
+            </span>
+            <button
+              onClick={() => setSelectedPoint(null)}
+              className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+            >
+              ✕
+            </button>
+          </div>
 
-            {/* Optimal Health */}
-            <div className="flex items-center gap-2.5 text-slate-800">
-              <span className="h-3.5 w-3.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/25 shrink-0" />
-              <span className="font-semibold text-[11.5px]">Optimal Health</span>
-            </div>
-
-            {/* Moderate Threat */}
-            <div className="flex items-center gap-2.5 text-slate-800">
-              <span className="h-3.5 w-3.5 rounded-full bg-amber-500 ring-4 ring-amber-500/25 shrink-0" />
-              <span className="font-semibold text-[11.5px]">Moderate Threat</span>
-            </div>
-
-            {/* Critical Alert Zone */}
-            <div className="flex items-center gap-2.5 text-slate-800">
-              <span className="h-3.5 w-3.5 rounded-full bg-rose-500 ring-4 ring-rose-500/30 shrink-0" />
-              <span className="font-semibold text-[11.5px]">Critical Alert Zone</span>
-            </div>
-
-            {/* High Risk Perimeter */}
-            <div className="flex items-center gap-2.5 text-slate-800 pt-1.5 border-t border-slate-100">
-              <span className="h-3 w-4 border-2 border-dashed border-rose-500 bg-emerald-300/40 rounded-xs shrink-0" />
-              <span className="font-semibold text-[11px] text-slate-700">High Risk Perimeter</span>
+          <div className="flex gap-3 items-center">
+            {selectedPoint.image_url && (
+              <img
+                src={selectedPoint.image_url}
+                alt={selectedPoint.common_name}
+                className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0"
+              />
+            )}
+            <div>
+              <h4 className="font-bold text-slate-900 text-sm leading-snug">
+                {selectedPoint.common_name}
+              </h4>
+              <p className="text-[11px] text-slate-500 italic font-mono">
+                {selectedPoint.scientific_name}
+              </p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono">
+                  IUCN: {selectedPoint.conservation_status}
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 font-mono">
+                  {selectedPoint.ai_confidence}% AI Match
+                </span>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Selected Sensor Station Drawer Details */}
-        {selectedSite && (
-          <div className="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-2xl p-4 max-w-sm w-full text-left animate-in slide-in-from-bottom-4 duration-200">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 leading-tight">
-                  {selectedSite.name}
-                </h4>
-                <p className="text-[10px] font-semibold text-emerald-600 mt-0.5">
-                  {selectedSite.type}
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedSite(null)}
-                className="text-slate-400 hover:text-slate-700 text-xs font-bold p-1 rounded-md"
-              >
-                ✕
-              </button>
+          <div className="space-y-1 text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <div><span className="font-semibold text-slate-400">Zone:</span> {selectedPoint.location_name}</div>
+            <div><span className="font-semibold text-slate-400">Habitat:</span> {selectedPoint.habitat}</div>
+            <div>
+              <span className="font-semibold text-slate-400">Coordinates:</span>{' '}
+              <span className="font-mono">{selectedPoint.latitude}° N, {selectedPoint.longitude}° E</span>
             </div>
+            {selectedPoint.is_location_obfuscated && (
+              <div className="flex items-center gap-1 text-rose-700 font-semibold text-[10px] mt-1 pt-1 border-t border-slate-200">
+                <Lock className="h-3 w-3 shrink-0" />
+                {selectedPoint.privacy_notice}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
-            <p className="text-[11px] text-slate-600 mb-2.5 bg-slate-50 p-2 rounded-lg border border-slate-100">
-              {selectedSite.details}
+      {/* Selected Campus Zone Card (Bottom Left Overlay) */}
+      {selectedZone && !selectedPoint && (
+        <div className="absolute bottom-4 left-4 z-[1000] max-w-sm w-full bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 p-4 shadow-xl text-xs animate-fadeIn space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-[10px] uppercase tracking-wider text-indigo-700 bg-indigo-100/70 px-2 py-0.5 rounded">
+              Campus Biosphere Zone
+            </span>
+            <button
+              onClick={() => setSelectedZone(null)}
+              className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-slate-900 text-sm leading-snug">
+              {selectedZone.name}
+            </h4>
+            <p className="text-[11px] text-slate-500 font-mono mt-0.5">
+              {selectedZone.habitat_type}
             </p>
+          </div>
 
-            <div className="flex items-center justify-between text-[11px] pt-1">
-              <span className="font-bold text-slate-500">Status:</span>
-              <span
-                className={`font-bold px-2 py-0.5 rounded text-[10px] ${
-                  selectedSite.severity === 'critical'
-                    ? 'bg-rose-100 text-rose-700'
-                    : selectedSite.severity === 'moderate'
-                    ? 'bg-amber-100 text-amber-800'
-                    : 'bg-emerald-100 text-emerald-800'
-                }`}
-              >
-                {selectedSite.status}
+          <div className="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <div>
+              <span className="text-slate-400 block text-[10px]">Health Index</span>
+              <span className="font-bold text-emerald-600 text-sm font-mono">
+                {selectedZone.health_score}/100
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-[10px]">Canopy Cover</span>
+              <span className="font-bold text-slate-800 text-sm font-mono">
+                {selectedZone.canopy_cover_pct}%
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-[10px]">Species Count</span>
+              <span className="font-bold text-slate-800 font-mono">
+                {selectedZone.species_count} Taxa
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-[10px]">Risk State</span>
+              <span className="font-bold text-amber-600 font-mono">
+                {selectedZone.risk_level}
               </span>
             </div>
           </div>
-        )}
-
-        {/* Bottom Left Scale Indicator */}
-        <div className="absolute bottom-4 left-4 z-10 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold text-slate-800 border border-slate-200 shadow-sm flex items-center gap-2.5">
-          <span>2 km</span>
-          <div className="w-14 h-1.5 bg-slate-900 rounded-xs" />
+          <div className="text-[10px] text-slate-500 italic">
+            Dominant taxa: {selectedZone.dominant_taxa}
+          </div>
         </div>
+      )}
 
-        {/* Bottom Right Zoom & Control Buttons */}
-        <div className="absolute bottom-4 right-4 flex flex-col gap-1.5 z-10">
-          <button
-            onClick={handleZoomIn}
-            className="h-8 w-8 rounded-xl bg-white/95 hover:bg-white text-slate-900 font-bold text-base shadow-md border border-slate-200 flex items-center justify-center transition-transform hover:scale-105"
-            title="Zoom In"
-          >
-            +
-          </button>
-          <button
-            onClick={handleZoomOut}
-            className="h-8 w-8 rounded-xl bg-white/95 hover:bg-white text-slate-900 font-bold text-base shadow-md border border-slate-200 flex items-center justify-center transition-transform hover:scale-105"
-            title="Zoom Out"
-          >
-            −
-          </button>
-          <button
-            onClick={handleRecenter}
-            className="h-8 w-8 rounded-xl bg-white/95 hover:bg-white text-slate-900 shadow-md border border-slate-200 flex items-center justify-center text-xs transition-transform hover:scale-105"
-            title="Center Forest Reserve"
-          >
-            🛡️
-          </button>
+      {/* Map Legend (Bottom Right Overlay) */}
+      <div className="absolute bottom-4 right-4 z-[1000] p-3 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-md text-xs space-y-1.5 pointer-events-auto">
+        <div className="font-bold text-[10px] uppercase tracking-wider text-slate-400 mb-1">
+          Campus Flora & Fauna Legend
+        </div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-slate-700">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-sky-500" /> Avian (Birds)
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Lepidoptera (Butterflies)
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600" /> Native Flora (Plants)
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-purple-600" /> Arthropods (Insects)
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-orange-600" /> Herpetofauna (Reptiles)
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 border border-white" /> Sensitive (Fuzzed)
+          </div>
         </div>
       </div>
     </div>

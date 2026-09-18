@@ -11,13 +11,21 @@ import RecentDetections from './components/RecentDetections';
 import QuickActions from './components/QuickActions';
 import ActionModal from './components/ActionModal';
 
-// Dedicated Sub-Views for All 14 Navigation Tabs
+// Dedicated Sub-Views for All 12 Navigation Tabs
+import ObserveView from './components/views/ObserveView';
+import SpeciesExplorerView from './components/views/SpeciesExplorerView';
+import HealthScoreView from './components/views/HealthScoreView';
+import AiAssistantView from './components/views/AiAssistantView';
+import ResponsibleAiView from './components/views/ResponsibleAiView';
+import AdminVerificationView from './components/views/AdminVerificationView';
+import DigitalTwinView from './components/views/DigitalTwinView';
+import ReportsView from './components/views/ReportsView';
+import AnalyticsView from './components/views/AnalyticsView';
+
+// Legacy / Specialized Views
 import EdnaView from './components/views/EdnaView';
 import RemoteSensingView from './components/views/RemoteSensingView';
 import GroundSurveysView from './components/views/GroundSurveysView';
-import AnalyticsView from './components/views/AnalyticsView';
-import DigitalTwinView from './components/views/DigitalTwinView';
-import ReportsView from './components/views/ReportsView';
 import DataUploadView from './components/views/DataUploadView';
 import UsersRolesView from './components/views/UsersRolesView';
 import SettingsView from './components/views/SettingsView';
@@ -37,72 +45,17 @@ import {
   Sparkles,
   Volume2,
   CameraOff,
+  Shield,
+  Camera,
 } from 'lucide-react';
 import { bioApi } from './services/api';
-
-function SpeciesCatalogCard({ item }) {
-  const [imgError, setImgError] = useState(false);
-  const hasImage = Boolean(item.image_url) && !imgError;
-
-  return (
-    <div
-      key={item.id}
-      className="bg-white rounded-2xl border border-slate-200 p-3.5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
-    >
-      <div>
-        <div className="h-40 w-full overflow-hidden rounded-xl mb-3 bg-slate-100 relative flex items-center justify-center">
-          {hasImage ? (
-            <img
-              src={item.image_url}
-              alt={item.common_name}
-              className="h-full w-full object-cover rounded-xl transition-transform duration-300 hover:scale-105"
-              loading="lazy"
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded-xl p-3 text-slate-400 select-none">
-              <CameraOff className="h-7 w-7 mb-1.5 text-slate-300" />
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                No Photo Available
-              </span>
-              <span className="text-[9px] text-slate-300 mt-0.5 font-mono">
-                {item.taxonomic_group}
-              </span>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center justify-between mb-1">
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono ${
-            item.conservation_status === 'CR' ? 'bg-rose-100 text-rose-700' :
-            item.conservation_status === 'EN' ? 'bg-orange-100 text-orange-700' :
-            item.conservation_status === 'VU' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
-          }`}>
-            IUCN: {item.conservation_status}
-          </span>
-          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-            {item.taxonomic_group}
-          </span>
-        </div>
-        <h3 className="font-bold text-slate-900 text-sm leading-tight mt-1.5">{item.common_name}</h3>
-        <p className="text-xs text-slate-400 italic font-mono mb-2">{item.scientific_name}</p>
-        <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{item.description}</p>
-      </div>
-
-      <div className="flex items-center justify-between text-xs pt-3 mt-3 border-t border-slate-100">
-        <span className="text-[10px] font-semibold text-slate-500">
-          {item.is_indicator_species ? 'Bio-Indicator' : (item.is_invasive ? 'Invasive Flag' : 'Native')}
-        </span>
-        <span className="font-mono text-[11px] font-bold text-slate-700">ID #{item.id}</span>
-      </div>
-    </div>
-  );
-}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
+  const [userRole, setUserRole] = useState('ecologist'); // 'ecologist' | 'citizen'
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalActionType, setModalActionType] = useState('upload_audio');
+  const [modalActionType, setModalActionType] = useState('add_observation');
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [selectedDetection, setSelectedDetection] = useState(null);
   const [selectedSite, setSelectedSite] = useState(null);
@@ -116,15 +69,6 @@ export default function App() {
   const [dataSourcesData, setDataSourcesData] = useState(null);
   const [habitatData, setHabitatData] = useState(null);
   const [isLoadingMain, setIsLoadingMain] = useState(false);
-
-  // Live PAM Acoustic ML Predictor State
-  const [pamInputs, setPamInputs] = useState({
-    min_frequency_hz: 650,
-    max_frequency_hz: 2400,
-    duration_seconds: 4.5,
-  });
-  const [pamPrediction, setPamPrediction] = useState(null);
-  const [isPredictingPam, setIsPredictingPam] = useState(false);
 
   useEffect(() => {
     loadGlobalData();
@@ -160,40 +104,35 @@ export default function App() {
 
   // Quick Action Handler
   const handleQuickAction = (actionId) => {
+    if (actionId === 'add_observation') {
+      setActiveTab('observe');
+      return;
+    }
     setModalActionType(actionId);
     setIsModalOpen(true);
   };
 
-  const handleRunPamPredictor = async (e) => {
-    e.preventDefault();
-    setIsPredictingPam(true);
-    try {
-      const res = await bioApi.predictAcoustic(pamInputs);
-      setPamPrediction(res);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsPredictingPam(false);
-    }
-  };
-
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#f8fafc] text-slate-900 font-sans antialiased">
-      {/* Left Sidebar Navigation (All 14 Tabs) */}
+      {/* Left Sidebar Navigation (12 Unified Tabs) */}
       <Sidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onOpenHealthDetails={() => setActiveTab('analytics')}
+        onOpenHealthDetails={() => setActiveTab('health_score')}
       />
 
       {/* Main Content Pane */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-[#f8fafc]">
-        {/* Sticky Header Bar */}
+        {/* Sticky Header Bar with Autocomplete Search & Role Switcher */}
         <Header
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
-          onOpenFilters={() => handleQuickAction('add_survey')}
+          userRole={userRole}
+          setUserRole={setUserRole}
           onOpenNotifications={() => setActiveTab('alerts')}
+          onNavigateTab={(tab, targetItem) => {
+            setActiveTab(tab);
+          }}
         />
 
         {/* Scrollable Main Viewport */}
@@ -207,20 +146,20 @@ export default function App() {
                   if (cardId === 'alerts' || cardId === 'risks') setActiveTab('alerts');
                   else if (cardId === 'species') setActiveTab('species');
                   else if (cardId === 'sites') setActiveTab('map');
+                  else if (cardId === 'health') setActiveTab('health_score');
                 }}
               />
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-                <div className="lg:col-span-2 min-h-[400px]">
+                <div className="lg:col-span-2 min-h-[440px]">
                   <EcosystemMap onSelectSite={(site) => setSelectedSite(site)} />
                 </div>
-                <div className="min-h-[400px]">
+                <div className="min-h-[440px]">
                   <RecentAlerts
                     alerts={alertsData}
                     onSelectAlert={(alert) => {
                       setSelectedAlert(alert);
-                      setModalActionType('create_alert');
-                      setIsModalOpen(true);
+                      setActiveTab('alerts');
                     }}
                     onViewAll={() => setActiveTab('alerts')}
                   />
@@ -249,197 +188,62 @@ export default function App() {
             </div>
           )}
 
-          {/* TAB 2: MAP EXPLORER */}
+          {/* TAB 2: OBSERVE & IDENTIFY (Optical AI Lens) */}
+          {activeTab === 'observe' && (
+            <ObserveView
+              onObservationCreated={() => {
+                loadGlobalData();
+              }}
+            />
+          )}
+
+          {/* TAB 3: TAXONOMIC SPECIES CATALOG */}
+          {activeTab === 'species' && <SpeciesExplorerView />}
+
+          {/* TAB 4: INTERACTIVE ECOSYSTEM MAP */}
           {activeTab === 'map' && (
-            <div className="space-y-6 max-w-[1600px] mx-auto">
-              <div className="flex items-center justify-between">
+            <div className="space-y-4 max-w-[1600px] mx-auto h-full min-h-[750px] flex flex-col">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">Spatial Telemetry & PostGIS GIS Explorer</h2>
-                  <p className="text-xs text-slate-500">8 Protected Biosphere Hotspots with Sensor Nodes & Geocoded Occurrences</p>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Campus Spatial Telemetry & Protected Habitat Zones
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    5 Protected Biosphere Zones with multi-class observation clusters & privacy safeguards.
+                  </p>
                 </div>
                 <button
-                  onClick={() => handleQuickAction('add_observation')}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-xs"
+                  onClick={() => setActiveTab('observe')}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-xs self-start sm:self-auto"
                 >
-                  + Add Spatial Sensor
+                  <Camera className="h-3.5 w-3.5" /> + Record Observation
                 </button>
               </div>
-              <div className="h-[750px] w-full">
+              <div className="flex-1 w-full min-h-[650px]">
                 <EcosystemMap onSelectSite={(site) => setSelectedSite(site)} />
               </div>
             </div>
           )}
 
-          {/* TAB 3: SPECIES CATALOG (Connected to 65+ Species Dataset) */}
-          {activeTab === 'species' && (
-            <div className="space-y-6 max-w-[1600px] mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900">Taxonomic Species Catalog ({speciesList.length} Species)</h2>
-                  <p className="text-xs text-slate-500">
-                    Comprehensive multi-class catalog with IUCN Red List categories (CR, EN, VU, NT, LC) & verified species photography
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleQuickAction('add_observation')}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-xs self-start sm:self-auto"
-                >
-                  + Record Field Sighting
-                </button>
-              </div>
+          {/* TAB 5: ANALYTICS & EFFORT-BIASED TRENDS */}
+          {activeTab === 'analytics' && <AnalyticsView />}
 
-              {/* Grid of Species Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {speciesList.map((item) => (
-                  <SpeciesCatalogCard key={item.id} item={item} />
-                ))}
-              </div>
-            </div>
-          )}
+          {/* TAB 6: HEALTH SCORE & STRUCTURED AI INSIGHTS */}
+          {activeTab === 'health_score' && <HealthScoreView />}
 
-          {/* TAB 4: BIOACOUSTICS PAM */}
-          {activeTab === 'bioacoustics' && (
-            <div className="space-y-6 max-w-[1600px] mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900">Passive Acoustic Monitoring (PAM) & Bioacoustics</h2>
-                  <p className="text-xs text-slate-500">
-                    Continuous wildlife soundscape telemetry, spectrogram frequencies & live acoustic species classifier
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleQuickAction('upload_audio')}
-                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-xs self-start sm:self-auto"
-                >
-                  <Mic className="h-4 w-4" /> Upload Audio Waveform
-                </button>
-              </div>
+          {/* TAB 7: DIGITAL TWIN & WHAT-IF RESTORATION SIMULATOR */}
+          {activeTab === 'digital_twin' && <DigitalTwinView />}
 
-              {/* Grid: ML Acoustic Classifier (L) & PAM Telemetry Stream (R) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                {/* Left: ML Species Sound Classifier Widget */}
-                <div className="lg:col-span-5 bg-gradient-to-b from-white to-emerald-50/30 rounded-2xl border border-emerald-200/80 p-5 shadow-sm space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 rounded-xl bg-emerald-600 text-white shadow-xs">
-                      <Sparkles className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-sm">ML Acoustic Species Identifier</h3>
-                      <p className="text-[11px] text-slate-500">Trained Random Forest BioNet Classifier</p>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleRunPamPredictor} className="space-y-3 text-xs">
-                    <div>
-                      <label className="font-medium text-slate-700 block mb-1">Min Frequency (Hz)</label>
-                      <input
-                        type="number"
-                        value={pamInputs.min_frequency_hz}
-                        onChange={(e) => setPamInputs({ ...pamInputs, min_frequency_hz: parseFloat(e.target.value) || 0 })}
-                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 font-mono focus:outline-emerald-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-medium text-slate-700 block mb-1">Max Frequency (Hz)</label>
-                      <input
-                        type="number"
-                        value={pamInputs.max_frequency_hz}
-                        onChange={(e) => setPamInputs({ ...pamInputs, max_frequency_hz: parseFloat(e.target.value) || 0 })}
-                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 font-mono focus:outline-emerald-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="font-medium text-slate-700 block mb-1">Call Duration (seconds)</label>
-                      <input
-                        type="number"
-                        step="0.1"
-                        value={pamInputs.duration_seconds}
-                        onChange={(e) => setPamInputs({ ...pamInputs, duration_seconds: parseFloat(e.target.value) || 0 })}
-                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-slate-800 font-mono focus:outline-emerald-500"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={isPredictingPam}
-                      className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-xs flex items-center justify-center gap-2 mt-2"
-                    >
-                      <Volume2 className={`h-4 w-4 ${isPredictingPam ? 'animate-spin' : ''}`} />
-                      {isPredictingPam ? 'Classifying Acoustic Signal...' : 'Identify Vocalizing Species'}
-                    </button>
-                  </form>
-
-                  {pamPrediction && (
-                    <div className="mt-3 p-3.5 rounded-xl bg-white border border-emerald-200 shadow-2xs space-y-2 animate-fadeIn">
-                      <div className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Classification Output</div>
-                      <div className="flex items-center justify-between">
-                        <div className="font-bold text-slate-900 text-sm">{pamPrediction.predicted_species}</div>
-                        <div className="font-mono font-bold text-emerald-700 text-xs">
-                          {(pamPrediction.confidence * 100).toFixed(1)}% Confidence
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right: PAM Vocalization Detections Table */}
-                <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-sm">Acoustic Detections Feed ({acousticList.length})</h3>
-                      <p className="text-[11px] text-slate-500">Autonomous sensor arrays across forest canopy</p>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">
-                      44.1 kHz • 16-bit PAM
-                    </span>
-                  </div>
-
-                  <div className="max-h-[460px] overflow-y-auto space-y-2.5 pr-1">
-                    {acousticList.map((item) => (
-                      <div
-                        key={item.detection_id}
-                        className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-200/70 transition-all text-xs"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold shrink-0">
-                            <Mic className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <div className="font-bold text-slate-900">{item.common_name}</div>
-                            <div className="text-[11px] text-slate-500 font-mono">
-                              {item.site_name} • {item.min_frequency_hz}-{item.max_frequency_hz} Hz ({item.duration_seconds}s)
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right font-mono">
-                          <div className="font-bold text-emerald-700">{(item.model_confidence * 100).toFixed(0)}% Match</div>
-                          <div className="text-[10px] text-slate-400">{item.verification_status}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: eDNA METABARCODING */}
-          {activeTab === 'edna' && <EdnaView />}
-
-          {/* TAB 6: REMOTE SENSING & CANOPY */}
-          {activeTab === 'remote_sensing' && <RemoteSensingView />}
-
-          {/* TAB 7: GROUND SURVEYS & FIELD NOTES */}
-          {activeTab === 'ground_surveys' && <GroundSurveysView />}
-
-          {/* TAB 8: ALERTS & RISKS */}
+          {/* TAB 8: ALERTS & THREAT INTELLIGENCE */}
           {activeTab === 'alerts' && (
             <div className="space-y-6 max-w-[1600px] mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-bold text-slate-900">Early Warning Threat Intelligence & Alerts</h2>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Early Warning Threat Intelligence & Risk Alerts
+                  </h2>
                   <p className="text-xs text-slate-500">
-                    Autonomous multi-modal event dispatch: chainsaw incursions, invasive outbreaks & canopy degradation
+                    Automated multi-factor risk monitoring: invasive weed encroachment, night noise disturbance, and canopy degradation.
                   </p>
                 </div>
                 <button
@@ -454,24 +258,36 @@ export default function App() {
                 {alertsData.map((alert) => (
                   <div
                     key={alert.id}
-                    className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between"
+                    className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-all"
                   >
                     <div>
                       <div className="flex items-center justify-between">
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-md border font-mono ${alert.severity_color || alert.severityColor}`}>
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-1 rounded-md border font-mono ${
+                            alert.severity_color || alert.severityColor || 'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}
+                        >
                           {alert.severity}
                         </span>
-                        <span className="text-[11px] font-mono text-slate-400">{alert.time}</span>
+                        <span className="text-[11px] font-mono text-slate-400">
+                          {alert.time || 'Logged recently'}
+                        </span>
                       </div>
-                      <h3 className="text-sm font-bold text-slate-900 mt-2.5">{alert.title}</h3>
-                      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{alert.description}</p>
+                      <h3 className="text-sm font-bold text-slate-900 mt-2.5">
+                        {alert.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                        {alert.description}
+                      </p>
                     </div>
 
                     <div className="flex items-center justify-between text-xs pt-4 mt-4 border-t border-slate-100 text-slate-500 font-medium">
                       <span className="flex items-center gap-1 font-mono text-[11px]">
                         <MapPin className="h-3.5 w-3.5 text-slate-400" /> {alert.location}
                       </span>
-                      <span className="text-[11px] font-semibold text-slate-400">{alert.source || 'Automated Telemetry'}</span>
+                      <span className="text-[11px] font-semibold text-slate-400">
+                        {alert.source || 'Automated Telemetry'}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -479,22 +295,24 @@ export default function App() {
             </div>
           )}
 
-          {/* TAB 9: ANALYTICS & ML PIPELINE */}
-          {activeTab === 'analytics' && <AnalyticsView />}
+          {/* TAB 9: RAG GENERATIVE AI ASSISTANT */}
+          {activeTab === 'ai_assistant' && <AiAssistantView />}
 
-          {/* TAB 10: DIGITAL TWIN & 3D SIMULATION */}
-          {activeTab === 'digital_twin' && <DigitalTwinView />}
+          {/* TAB 10: RESPONSIBLE AI & CONSERVATION INTEGRITY */}
+          {activeTab === 'responsible_ai' && <ResponsibleAiView />}
 
-          {/* TAB 11: REPORTS GENERATOR */}
+          {/* TAB 11: EXECUTIVE REPORTS & SDG 15 AUDIT */}
           {activeTab === 'reports' && <ReportsView />}
 
-          {/* TAB 12: DATA UPLOAD & INGESTION */}
+          {/* TAB 12: ADMIN PEER VERIFICATION & RAG INGESTION */}
+          {activeTab === 'admin' && <AdminVerificationView />}
+
+          {/* FALLBACK / SECONDARY SPECIALIZED VIEWS */}
+          {activeTab === 'edna' && <EdnaView />}
+          {activeTab === 'remote_sensing' && <RemoteSensingView />}
+          {activeTab === 'ground_surveys' && <GroundSurveysView />}
           {activeTab === 'data_upload' && <DataUploadView />}
-
-          {/* TAB 13: USERS, ROLES & RBAC */}
           {activeTab === 'users' && <UsersRolesView />}
-
-          {/* TAB 14: SYSTEM SETTINGS */}
           {activeTab === 'settings' && <SettingsView />}
         </main>
       </div>

@@ -1,8 +1,8 @@
 from typing import List, Optional, TYPE_CHECKING
 from sqlalchemy import String, Text, Float, Integer, ForeignKey, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from geoalchemy2 import Geometry
 from app.core.database import Base, TimestampMixin
+from app.core.spatial_compat import GeoJSONGeometry
 from app.models.enums import RiskLevel, SiteStatus
 
 if TYPE_CHECKING:
@@ -21,11 +21,13 @@ class Zone(Base, TimestampMixin):
     code: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
-    # Polygon boundary in WGS84 (SRID 4326)
-    boundary: Mapped[Geometry] = mapped_column(
-        Geometry(geometry_type="POLYGON", srid=4326, spatial_index=True),
-        nullable=False,
+    # Polygon boundary in WGS84 GeoJSON
+    boundary: Mapped[Optional[str]] = mapped_column(
+        GeoJSONGeometry,
+        nullable=True,
     )
+    center_lat: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    center_lng: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     area_hectares: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     risk_level: Mapped[RiskLevel] = mapped_column(
         SQLEnum(RiskLevel, name="risk_level_enum"),
@@ -73,10 +75,12 @@ class MonitoringSite(Base, TimestampMixin):
     code: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
-    # Point location in WGS84 (SRID 4326)
-    location: Mapped[Geometry] = mapped_column(
-        Geometry(geometry_type="POINT", srid=4326, spatial_index=True),
-        nullable=False,
+    # Coordinates in WGS84 (SRID 4326)
+    latitude: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    longitude: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    location: Mapped[Optional[str]] = mapped_column(
+        GeoJSONGeometry,
+        nullable=True,
     )
     zone_id: Mapped[Optional[int]] = mapped_column(
         Integer, ForeignKey("zones.id", ondelete="SET NULL"), nullable=True, index=True

@@ -33,6 +33,11 @@ AUDIO_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "data", "audio"))
 if os.path.exists(AUDIO_DIR):
     app.mount("/audio_files", StaticFiles(directory=AUDIO_DIR), name="audio_files")
 
+# Static Species Images Mount
+IMAGES_DIR = os.path.abspath(os.path.join(CURRENT_DIR, "..", "frontend", "public", "images"))
+if os.path.exists(IMAGES_DIR):
+    app.mount("/images", StaticFiles(directory=IMAGES_DIR), name="images")
+
 # Mount API v1 Master Router
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

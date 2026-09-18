@@ -4,14 +4,35 @@ const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 export const bioApi = {
-  // Species
+  // Dashboard Master Aggregate
+  getDashboardData: async () => {
+    try {
+      const res = await apiClient.get('/dashboard');
+      return res.data;
+    } catch (err) {
+      console.warn('Backend offline, using fallback dashboard data:', err);
+      return null;
+    }
+  },
+
+  // Legacy dashboard stats
+  getDashboardStats: async () => {
+    try {
+      const res = await apiClient.get('/analytics/dashboard-stats');
+      return res.data;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  // Species Catalog
   getSpecies: async (params = {}) => {
     try {
       const res = await apiClient.get('/species', { params });
@@ -22,142 +43,63 @@ export const bioApi = {
     }
   },
 
-  getSpeciesStats: async () => {
+  getSpeciesById: async (id) => {
     try {
-      const res = await apiClient.get('/species/summary/stats');
+      const res = await apiClient.get(`/species/${id}`);
       return res.data;
     } catch (err) {
-      return {};
+      return null;
     }
   },
 
-  // eDNA
-  getEdnaSamples: async (params = {}) => {
-    try {
-      const res = await apiClient.get('/edna/samples', { params });
-      return res.data;
-    } catch (err) {
-      return { total: 0, items: [] };
-    }
-  },
-
-  getEdnaDetections: async (params = {}) => {
-    try {
-      const res = await apiClient.get('/edna/detections', { params });
-      return res.data;
-    } catch (err) {
-      return { total: 0, items: [] };
-    }
-  },
-
-  getEdnaMetrics: async () => {
-    try {
-      const res = await apiClient.get('/edna/summary/metrics');
-      return res.data;
-    } catch (err) {
-      return {};
-    }
-  },
-
-  // Bioacoustics
-  getAcousticDetections: async (params = {}) => {
-    try {
-      const res = await apiClient.get('/acoustics/detections', { params });
-      return res.data;
-    } catch (err) {
-      return { total: 0, items: [] };
-    }
-  },
-
-  getAudioRecordings: async () => {
-    try {
-      const res = await apiClient.get('/acoustics/recordings');
-      return res.data;
-    } catch (err) {
-      return { total: 0, recordings: [] };
-    }
-  },
-
-  getAcousticStats: async () => {
-    try {
-      const res = await apiClient.get('/acoustics/summary/stats');
-      return res.data;
-    } catch (err) {
-      return {};
-    }
-  },
-
-  // Satellite & Remote Sensing
-  getSatelliteTimeseries: async (params = {}) => {
-    try {
-      const res = await apiClient.get('/satellite/timeseries', { params });
-      return res.data;
-    } catch (err) {
-      return { total: 0, items: [] };
-    }
-  },
-
-  getMonitoringSites: async () => {
-    try {
-      const res = await apiClient.get('/satellite/sites');
-      return res.data;
-    } catch (err) {
-      return { type: 'FeatureCollection', features: [] };
-    }
-  },
-
-  getSatelliteStats: async () => {
-    try {
-      const res = await apiClient.get('/satellite/summary/stats');
-      return res.data;
-    } catch (err) {
-      return {};
-    }
-  },
-
-  // Ground Surveys
-  getSurveys: async (params = {}) => {
-    try {
-      const res = await apiClient.get('/surveys', { params });
-      return res.data;
-    } catch (err) {
-      return { total: 0, items: [] };
-    }
-  },
-
-  getSurveyStats: async () => {
-    try {
-      const res = await apiClient.get('/surveys/summary/stats');
-      return res.data;
-    } catch (err) {
-      return {};
-    }
-  },
-
-  // Threat Alerts
-  getAlerts: async (params = {}) => {
-    try {
-      const res = await apiClient.get('/alerts', { params });
-      return res.data;
-    } catch (err) {
-      return { total: 0, items: [] };
-    }
-  },
-
-  createAlert: async (payload) => {
-    const res = await apiClient.post('/alerts', payload);
+  addSpecies: async (data) => {
+    const res = await apiClient.post('/species', data);
     return res.data;
   },
 
-  resolveAlert: async (alertId) => {
-    const res = await apiClient.patch(`/alerts/${alertId}/resolve`);
+  // Observations Workflow
+  getObservations: async (params = {}) => {
+    try {
+      const res = await apiClient.get('/observations', { params });
+      return res.data;
+    } catch (err) {
+      return { total: 0, items: [] };
+    }
+  },
+
+  createObservation: async (payload) => {
+    const res = await apiClient.post('/observations', payload);
     return res.data;
   },
 
-  // Analytics & Dashboard
-  getDashboardStats: async () => {
+  identifyImage: async (filename, category) => {
+    const res = await apiClient.post('/observations/identify', null, {
+      params: { filename, category_hint: category },
+    });
+    return res.data;
+  },
+
+  verifyObservation: async (id, action = 'verify') => {
+    const res = await apiClient.post(`/observations/${id}/verify`, null, {
+      params: { action },
+    });
+    return res.data;
+  },
+
+  // Map
+  getMapObservations: async (params = {}) => {
     try {
-      const res = await apiClient.get('/analytics/dashboard-stats');
+      const res = await apiClient.get('/map/observations', { params });
+      return res.data;
+    } catch (err) {
+      return { total_points: 0, points: [], campus_zones: [] };
+    }
+  },
+
+  // Analytics & Health Score
+  getAnalyticsOverview: async () => {
+    try {
+      const res = await apiClient.get('/analytics/overview');
       return res.data;
     } catch (err) {
       return null;
@@ -166,16 +108,163 @@ export const bioApi = {
 
   getBiodiversityTrends: async () => {
     try {
-      const res = await apiClient.get('/analytics/biodiversity-trends');
+      const res = await apiClient.get('/analytics/trends');
       return res.data;
     } catch (err) {
       return null;
     }
   },
 
+  getHealthScore: async () => {
+    try {
+      const res = await apiClient.get('/analytics/health-score');
+      return res.data;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  getEnvironmentalData: async () => {
+    try {
+      const res = await apiClient.get('/analytics/environmental');
+      return res.data;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  getDataQuality: async () => {
+    try {
+      const res = await apiClient.get('/analytics/quality');
+      return res.data;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  getAnomalies: async () => {
+    try {
+      const res = await apiClient.get('/analytics/anomalies');
+      return res.data;
+    } catch (err) {
+      return { total_anomalies: 0, items: [] };
+    }
+  },
+
+  // Alerts
+  getAlerts: async () => {
+    try {
+      const res = await apiClient.get('/alerts');
+      return res.data;
+    } catch (err) {
+      return { total: 0, items: [] };
+    }
+  },
+
+  resolveAlert: async (id) => {
+    const res = await apiClient.post(`/alerts/${id}/resolve`);
+    return res.data;
+  },
+
+  // AI & RAG
+  askAiAssistant: async (query) => {
+    const res = await apiClient.post('/ai/chat', { query });
+    return res.data;
+  },
+
+  getAiInsights: async () => {
+    try {
+      const res = await apiClient.get('/ai/insights');
+      return res.data;
+    } catch (err) {
+      return { total: 0, insights: [] };
+    }
+  },
+
+  // Digital Twin & What-If Simulation
+  getCampusZones: async () => {
+    try {
+      const res = await apiClient.get('/digital-twin/zones');
+      return res.data;
+    } catch (err) {
+      return { total_zones: 0, zones: [] };
+    }
+  },
+
+  simulateScenario: async (payload) => {
+    const res = await apiClient.post('/digital-twin/simulate', payload);
+    return res.data;
+  },
+
+  // Recommendations
+  getRecommendations: async () => {
+    try {
+      const res = await apiClient.get('/recommendations');
+      return res.data;
+    } catch (err) {
+      return { total: 0, recommendations: [] };
+    }
+  },
+
+  // Reports
+  getReportData: async () => {
+    try {
+      const res = await apiClient.get('/reports');
+      return res.data;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  generateExecutiveReport: async (payload) => {
+    const res = await apiClient.post('/reports/generate', payload);
+    return res.data;
+  },
+
+  // Admin & Verification Queue
+  getVerificationQueue: async () => {
+    try {
+      const res = await apiClient.get('/admin/verification-queue');
+      return res.data;
+    } catch (err) {
+      return { pending_count: 0, items: [] };
+    }
+  },
+
+  getAdminStats: async () => {
+    try {
+      const res = await apiClient.get('/admin/stats');
+      return res.data;
+    } catch (err) {
+      return null;
+    }
+  },
+
+  // Knowledge Documents
+  getKnowledgeDocs: async () => {
+    try {
+      const res = await apiClient.get('/rag/documents');
+      return res.data;
+    } catch (err) {
+      return { total: 0, documents: [] };
+    }
+  },
+
+  addKnowledgeDoc: async (data) => {
+    const res = await apiClient.post('/rag/documents', data);
+    return res.data;
+  },
+
+  // Acoustic Predictor
+  predictAcoustic: async (inputs) => {
+    const res = await apiClient.post('/ml/predict/acoustic', inputs);
+    return res.data;
+  },
+
+  // Legacy chart helpers
   getDataSourcesBreakdown: async () => {
     try {
-      const res = await apiClient.get('/analytics/data-sources-breakdown');
+      const res = await apiClient.get('/analytics/data-sources');
       return res.data;
     } catch (err) {
       return null;
@@ -190,33 +279,4 @@ export const bioApi = {
       return null;
     }
   },
-
-  // Machine Learning Live Inference
-  predictAcoustic: async (payload) => {
-    const res = await apiClient.post('/ml/predict/acoustic', payload);
-    return res.data;
-  },
-
-  predictEdna: async (payload) => {
-    const res = await apiClient.post('/ml/predict/edna', payload);
-    return res.data;
-  },
-
-  predictCanopy: async (payload) => {
-    const res = await apiClient.post('/ml/predict/canopy', payload);
-    return res.data;
-  },
-
-  triggerRetraining: async () => {
-    const res = await apiClient.post('/ml/train');
-    return res.data;
-  },
-
-  // Reports
-  generateReport: async (payload) => {
-    const res = await apiClient.post('/reports/generate', payload);
-    return res.data;
-  },
 };
-
-export default apiClient;
